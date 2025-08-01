@@ -69,14 +69,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/candidates/create', [CandidateController::class, 'create'])->name('candidates.create');
     Route::post('/candidates', [CandidateController::class, 'store'])->name('candidates.store');
     Route::get('/candidates/{candidate}', [CandidateController::class, 'show'])->name('candidates.show');
+    Route::get('/candidates/{candidate}/data', [CandidateController::class, 'getCandidateData'])->name('candidates.data.show');
     Route::get('/candidates/{candidate}/edit', [CandidateController::class, 'edit'])->name('candidates.edit');
     Route::put('/candidates/{candidate}', [CandidateController::class, 'update'])->name('candidates.update');
     Route::delete('/candidates/{candidate}', [CandidateController::class, 'destroy'])->name('candidates.destroy');
     Route::put('/candidates/{candidate}/status', [CandidateController::class, 'updateStatus'])->name('candidates.updateStatus');
     Route::get('/candidates/{candidate}/logs', [CandidateController::class, 'logs'])->name('candidates.logs');
     Route::get('/candidates-data', [CandidateController::class, 'getCandidatesData'])->name('candidates.data');
+    Route::post('/api/check-phone', [CandidateController::class, 'checkPhone'])->name('candidates.checkPhone');
 
-    // Follow-up routes
+
     Route::prefix('followups')->group(function () {
         Route::get('/', [FollowUpController::class, 'index'])->name('followups.index');
         Route::get('/create', [FollowUpController::class, 'create'])->name('followups.create');
@@ -118,6 +120,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/hr', [HrController::class, 'index'])->name('hr.index');
     Route::post('/hr', [HrController::class, 'store'])->name('hr.store');
     Route::post('/hr/brand', [HrController::class, 'storeBrand'])->name('hr.store.brand');
+    Route::get('/hr-data', [HrController::class, 'getHrData'])->name('hr.data');
 
     // Pipeline routes
     Route::get('/pipelines', [PipelineController::class, 'index'])->name('pipelines.index');
@@ -129,7 +132,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Resource routes for Deals, Activities, Notes, and Documents
     Route::resource('deals', DealController::class)->only(['index', 'store', 'show', 'update', 'destroy']);
-    Route::post('deals_store_in_contact', [DealController::class, 'deals_store_in_contact'])->name('deals_store_in_contact');
+    Route::post('deals_store_in_candidate', [DealController::class, 'deals_store_in_candidate'])->name('deals_store_in_candidate');
 
     Route::resource('activities', ActivityController::class)->only(['index', 'store', 'show', 'update', 'destroy']);
     Route::resource('notes', NoteController::class)->only(['index', 'store', 'show', 'update', 'destroy']);

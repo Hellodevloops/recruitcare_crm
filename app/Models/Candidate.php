@@ -17,8 +17,10 @@ class Candidate extends Model
         'email',
         'phone',
         'company_name',
-        'position',
+        'designations',
         'status',
+        'current_ctc',
+        'expected_ctc',
         'resume',
         'documents',
         'owner_id',
@@ -26,6 +28,7 @@ class Candidate extends Model
 
     protected $casts = [
         'documents' => 'array',
+        'designations' => 'array',
     ];
     public function deals()
     {

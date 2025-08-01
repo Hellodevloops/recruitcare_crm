@@ -14,6 +14,7 @@ class Deal extends Model
         'candidate_id',
         'brand_id',
         'position_id',
+        'hr_id',
         'pipeline_id',
         'stage_id',
         'title',
@@ -37,6 +38,7 @@ class Deal extends Model
                 'candidate_id',
                 'brand_id',
                 'position_id',
+                'hr_id',
                 'pipeline_id',
                 'stage_id',
                 'title',
@@ -69,6 +71,11 @@ class Deal extends Model
     public function position()
     {
         return $this->belongsTo(Position::class);
+    }
+
+    public function hr()
+    {
+        return $this->belongsTo(Hr::class);
     }
 
     public function pipeline()

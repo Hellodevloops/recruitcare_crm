@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { Mail, Phone, MapPin, Edit, ArrowLeft, FileText, Download, Building, Calendar, Briefcase } from 'lucide-react';
+import { Mail, Phone, MapPin, Edit, ArrowLeft, FileText, Download, Building, Calendar, Briefcase, Trash2, Plus, ChevronDown, ChevronUp } from 'lucide-react';
 import axios from 'axios';
 import { Candidate } from '@/types';
 import AppLayout from '@/layouts/app-layout';
@@ -23,7 +23,6 @@ const breadcrumbs = [
     { title: 'Candidates', href: '/candidates' },
     { title: 'Candidate Details', href: null },
 ];
-
 const Show: React.FC = () => {
     const { props } = usePage<{ candidate: Candidate }>();
     const [candidate, setCandidate] = useState<Candidate>(props.candidate);
@@ -31,6 +30,7 @@ const Show: React.FC = () => {
     const [activeTab, setActiveTab] = useState('activity');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [showFullInfo, setShowFullInfo] = useState(false);
 
     // Check if candidate exists
     if (!candidate) {
@@ -294,6 +294,50 @@ const Show: React.FC = () => {
                                                 />
                                             </div>
                                             <div>
+                                                <Label htmlFor="designations">Designations</Label>
+                                                <div className="space-y-2">
+                                                    {candidate.designations && candidate.designations.map((designation, index) => (
+                                                        <div key={index} className="flex gap-2">
+                                                            <Input
+                                                                value={designation}
+                                                                onChange={(e) => {
+                                                                    const newDesignations = [...(candidate.designations || [])];
+                                                                    newDesignations[index] = e.target.value;
+                                                                    setCandidate(prev => ({ ...prev, designations: newDesignations }));
+                                                                }}
+                                                                placeholder="Enter designation"
+                                                                disabled={isLoading}
+                                                            />
+                                                            <Button
+                                                                type="button"
+                                                                variant="outline"
+                                                                size="sm"
+                                                                onClick={() => {
+                                                                    const newDesignations = candidate.designations?.filter((_, i) => i !== index) || [];
+                                                                    setCandidate(prev => ({ ...prev, designations: newDesignations }));
+                                                                }}
+                                                                disabled={isLoading}
+                                                            >
+                                                                <Trash2 className="h-4 w-4" />
+                                                            </Button>
+                                                        </div>
+                                                    ))}
+                                                    <Button
+                                                        type="button"
+                                                        variant="outline"
+                                                        size="sm"
+                                                        onClick={() => {
+                                                            const newDesignations = [...(candidate.designations || []), ''];
+                                                            setCandidate(prev => ({ ...prev, designations: newDesignations }));
+                                                        }}
+                                                        disabled={isLoading}
+                                                    >
+                                                        <Plus className="h-4 w-4 mr-1" />
+                                                        Add Designation
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                            <div>
                                                 <Label htmlFor="status">Status</Label>
                                                 <Select
                                                     value={candidate.status || 'interested'}
@@ -311,6 +355,32 @@ const Show: React.FC = () => {
                                                     </SelectContent>
                                                 </Select>
                                             </div>
+                                            <div>
+                                                <Label htmlFor="current_ctc">Current CTC (₹)</Label>
+                                                <Input
+                                                    id="current_ctc"
+                                                    type="number"
+                                                    step="0.01"
+                                                    min="0"
+                                                    value={candidate.current_ctc || ''}
+                                                    onChange={(e) => handleCandidateChange('current_ctc', e.target.value)}
+                                                    disabled={isLoading}
+                                                    placeholder="Enter current CTC"
+                                                />
+                                            </div>
+                                            <div>
+                                                <Label htmlFor="expected_ctc">Expected CTC (₹)</Label>
+                                                <Input
+                                                    id="expected_ctc"
+                                                    type="number"
+                                                    step="0.01"
+                                                    min="0"
+                                                    value={candidate.expected_ctc || ''}
+                                                    onChange={(e) => handleCandidateChange('expected_ctc', e.target.value)}
+                                                    disabled={isLoading}
+                                                    placeholder="Enter expected CTC"
+                                                />
+                                            </div>
                                         </div>
                                         <Button
                                             type="submit"
@@ -321,127 +391,204 @@ const Show: React.FC = () => {
                                         </Button>
                                     </form>
                                 ) : (
-                                    // Display Mode: Static candidate info
+                                    // Display Mode: Static candidate info with accordion
                                     <div className="space-y-4">
-                                        {candidate.email && (
-                                            <div className="flex items-center gap-3">
-                                                <Mail className="h-4 w-4 text-muted-foreground" />
-                                                <div>
-                                                    <p className="text-sm text-muted-foreground">Email</p>
-                                                    <a href={`mailto:${candidate.email}`} className="text-sm text-blue-600 hover:underline">{candidate.email}</a>
+                                        {/* Basic Information - Always Visible */}
+                                        <div className="space-y-3">
+                                            {candidate.email && (
+                                                <div className="flex items-center gap-3">
+                                                    <Mail className="h-4 w-4 text-muted-foreground" />
+                                                    <div>
+                                                        <p className="text-sm text-muted-foreground">Email</p>
+                                                        <a href={`mailto:${candidate.email}`} className="text-sm text-blue-600 hover:underline">{candidate.email}</a>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        )}
-                                        {candidate.phone && (
-                                            <div className="flex items-center gap-3">
-                                                <Phone className="h-4 w-4 text-muted-foreground" />
-                                                <div>
-                                                    <p className="text-sm text-muted-foreground">Phone</p>
-                                                    <p className="text-sm">{candidate.phone}</p>
+                                            )}
+                                            {candidate.phone && (
+                                                <div className="flex items-center gap-3">
+                                                    <Phone className="h-4 w-4 text-muted-foreground" />
+                                                    <div>
+                                                        <p className="text-sm text-muted-foreground">Phone</p>
+                                                        <p className="text-sm">{candidate.phone}</p>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        )}
-                                        {(candidate.city || candidate.state || candidate.country) && (
+                                            )}
                                             <div className="flex items-center gap-3">
-                                                <MapPin className="h-4 w-4 text-muted-foreground" />
-                                                <div>
-                                                    <p className="text-sm text-muted-foreground">Location</p>
-                                                    <p className="text-sm">
-                                                        {candidate.city}{candidate.city && candidate.state ? ', ' : ''}{candidate.state} {candidate.country}
-                                                    </p>
+                                                <span className="h-4 w-4">📊</span>
+                                                <div className="w-full">
+                                                    <p className="text-sm text-muted-foreground">Status</p>
+                                                    <Select
+                                                        value={candidate.status || 'interested'}
+                                                        onValueChange={handleStatusUpdate}
+                                                        disabled={isLoading}
+                                                    >
+                                                        <SelectTrigger className="w-full">
+                                                            <SelectValue placeholder="Select status" />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            <SelectItem value="interested">Interested</SelectItem>
+                                                            <SelectItem value="not_interested">Not Interested</SelectItem>
+                                                            <SelectItem value="dnd">Do Not Disturb</SelectItem>
+                                                            <SelectItem value="followup">Follow Up</SelectItem>
+                                                        </SelectContent>
+                                                    </Select>
                                                 </div>
-                                            </div>
-                                        )}
-                                        {candidate.website && (
-                                            <div className="flex items-center gap-3">
-                                                <span className="h-4 w-4">🌐</span>
-                                                <div>
-                                                    <p className="text-sm text-muted-foreground">Website</p>
-                                                    <a href={candidate.website} target="_blank" className="text-sm text-blue-600 hover:underline" rel="noopener noreferrer">
-                                                        {candidate.website}
-                                                    </a>
-                                                </div>
-                                            </div>
-                                        )}
-                                        <div className="flex items-center gap-3">
-                                            <span className="h-4 w-4">📊</span>
-                                            <div className="w-full">
-                                                <p className="text-sm text-muted-foreground">Status</p>
-                                                <Select
-                                                    value={candidate.status || 'interested'}
-                                                    onValueChange={handleStatusUpdate}
-                                                    disabled={isLoading}
-                                                >
-                                                    <SelectTrigger className="w-full">
-                                                        <SelectValue placeholder="Select status" />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        <SelectItem value="interested">Interested</SelectItem>
-                                                        <SelectItem value="not_interested">Not Interested</SelectItem>
-                                                        <SelectItem value="dnd">Do Not Disturb</SelectItem>
-                                                        <SelectItem value="followup">Follow Up</SelectItem>
-                                                    </SelectContent>
-                                                </Select>
                                             </div>
                                         </div>
-                                        {candidate.resume && (
-                                            <div className="flex items-center gap-3">
-                                                <FileText className="h-4 w-4 text-muted-foreground" />
-                                                <div className="w-full">
-                                                    <p className="text-sm text-muted-foreground">Resume</p>
-                                                    <a 
-                                                        href={`/storage/${candidate.resume}`} 
-                                                        target="_blank" 
-                                                        className="text-sm text-blue-600 hover:underline"
-                                                    >
-                                                        Resume.pdf
-                                                    </a>
-                                                </div>
-                                            </div>
-                                        )}
-                                        {candidate.company_name && (
-                                            <div className="flex items-center gap-3">
-                                                <span className="h-4 w-4">🏢</span>
-                                                <div>
-                                                    <p className="text-sm text-muted-foreground">Company</p>
-                                                    <p className="text-sm">{candidate.company_name}</p>
-                                                </div>
-                                            </div>
-                                        )}
-                                        {candidate.owner && (
-                                            <div className="flex items-center gap-3">
-                                                <span className="h-4 w-4">👤</span>
-                                                <div>
-                                                    <p className="text-sm text-muted-foreground">Owner</p>
-                                                    <p className="text-sm">{candidate.owner.name}</p>
-                                                </div>
-                                            </div>
-                                        )}
-                                        {candidate.created_at && (
-                                            <div className="flex items-center gap-3">
-                                                <span className="h-4 w-4">📅</span>
-                                                <div>
-                                                    <p className="text-sm text-muted-foreground">Created At</p>
-                                                    <p className="text-sm">{new Date(candidate.created_at).toLocaleDateString()}</p>
-                                                </div>
-                                            </div>
-                                        )}
-                                        {candidate.updated_at && (
-                                            <div className="flex items-center gap-3">
-                                                <span className="h-4 w-4">🔄</span>
-                                                <div>
-                                                    <p className="text-sm text-muted-foreground">Updated At</p>
-                                                    <p className="text-sm">{new Date(candidate.updated_at).toLocaleDateString()}</p>
-                                                </div>
-                                            </div>
-                                        )}
-                                        {candidate.last_activity_at && (
-                                            <div className="flex items-center gap-3">
-                                                <span className="h-4 w-4">⚡</span>
-                                                <div>
-                                                    <p className="text-sm text-muted-foreground">Last Activity</p>
-                                                    <p className="text-sm">{new Date(candidate.last_activity_at).toLocaleDateString()}</p>
-                                                </div>
+
+                                        {/* View More Button */}
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => setShowFullInfo(!showFullInfo)}
+                                            className="w-full flex items-center justify-center gap-2"
+                                        >
+                                            {showFullInfo ? (
+                                                <>
+                                                    <ChevronUp className="h-4 w-4" />
+                                                    View Less
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <ChevronDown className="h-4 w-4" />
+                                                    View More Details
+                                                </>
+                                            )}
+                                        </Button>
+
+                                        {/* Expanded Information */}
+                                        {showFullInfo && (
+                                            <div className="space-y-3 pt-3 border-t">
+                                                {(candidate.city || candidate.state || candidate.country) && (
+                                                    <div className="flex items-center gap-3">
+                                                        <MapPin className="h-4 w-4 text-muted-foreground" />
+                                                        <div>
+                                                            <p className="text-sm text-muted-foreground">Location</p>
+                                                            <p className="text-sm">
+                                                                {candidate.city}{candidate.city && candidate.state ? ', ' : ''}{candidate.state} {candidate.country}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                                {candidate.website && (
+                                                    <div className="flex items-center gap-3">
+                                                        <span className="h-4 w-4">🌐</span>
+                                                        <div>
+                                                            <p className="text-sm text-muted-foreground">Website</p>
+                                                            <a href={candidate.website} target="_blank" className="text-sm text-blue-600 hover:underline" rel="noopener noreferrer">
+                                                                {candidate.website}
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                                {candidate.resume && (
+                                                    <div className="flex items-center gap-3">
+                                                        <FileText className="h-4 w-4 text-muted-foreground" />
+                                                        <div className="w-full">
+                                                            <p className="text-sm text-muted-foreground">Resume</p>
+                                                            <a 
+                                                                href={`/storage/${candidate.resume}`} 
+                                                                target="_blank" 
+                                                                className="text-sm text-blue-600 hover:underline"
+                                                            >
+                                                                Resume.pdf
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                                {candidate.company_name && (
+                                                    <div className="flex items-center gap-3">
+                                                        <span className="h-4 w-4">🏢</span>
+                                                        <div>
+                                                            <p className="text-sm text-muted-foreground">Company</p>
+                                                            <p className="text-sm">{candidate.company_name}</p>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                                {candidate.designations && candidate.designations.length > 0 && (
+                                                    <div className="flex items-center gap-3">
+                                                        <span className="h-4 w-4">💼</span>
+                                                        <div>
+                                                            <p className="text-sm text-muted-foreground">Designations</p>
+                                                            <div className="space-y-2 mt-1">
+                                                                {candidate.designations.map((designation, index) => (
+                                                                    <div key={index} className="text-sm">
+                                                                        <div className="font-medium">{designation.title}</div>
+                                                                        {designation.company && (
+                                                                            <div className="text-gray-600">{designation.company}</div>
+                                                                        )}
+                                                                        {designation.start_date && (
+                                                                            <div className="text-gray-500 text-xs">
+                                                                                {new Date(designation.start_date).toLocaleDateString()}
+                                                                                {designation.end_date && ` - ${new Date(designation.end_date).toLocaleDateString()}`}
+                                                                                {designation.is_current && ' (Current)'}
+                                                                            </div>
+                                                                        )}
+                                                                    </div>
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                                {(candidate.current_ctc || candidate.expected_ctc) && (
+                                                    <div className="flex items-center gap-3">
+                                                        <span className="h-4 w-4">💰</span>
+                                                        <div>
+                                                            <p className="text-sm text-muted-foreground">CTC Information</p>
+                                                            <div className="space-y-1 mt-1">
+                                                                {candidate.current_ctc && (
+                                                                    <div className="text-sm">
+                                                                        <span className="text-gray-600">Current CTC:</span>
+                                                                        <span className="font-medium ml-1">₹{candidate.current_ctc.toLocaleString()}</span>
+                                                                    </div>
+                                                                )}
+                                                                {candidate.expected_ctc && (
+                                                                    <div className="text-sm">
+                                                                        <span className="text-gray-600">Expected CTC:</span>
+                                                                        <span className="font-medium ml-1">₹{candidate.expected_ctc.toLocaleString()}</span>
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                                {candidate.owner && (
+                                                    <div className="flex items-center gap-3">
+                                                        <span className="h-4 w-4">👤</span>
+                                                        <div>
+                                                            <p className="text-sm text-muted-foreground">Created By</p>
+                                                            <p className="text-sm font-medium text-blue-600">{candidate.owner.name}</p>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                                {candidate.created_at && (
+                                                    <div className="flex items-center gap-3">
+                                                        <span className="h-4 w-4">📅</span>
+                                                        <div>
+                                                            <p className="text-sm text-muted-foreground">Created At</p>
+                                                            <p className="text-sm">{new Date(candidate.created_at).toLocaleDateString()}</p>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                                {candidate.updated_at && (
+                                                    <div className="flex items-center gap-3">
+                                                        <span className="h-4 w-4">🔄</span>
+                                                        <div>
+                                                            <p className="text-sm text-muted-foreground">Updated At</p>
+                                                            <p className="text-sm">{new Date(candidate.updated_at).toLocaleDateString()}</p>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                                {candidate.last_activity_at && (
+                                                    <div className="flex items-center gap-3">
+                                                        <span className="h-4 w-4">⚡</span>
+                                                        <div>
+                                                            <p className="text-sm text-muted-foreground">Last Activity</p>
+                                                            <p className="text-sm">{new Date(candidate.last_activity_at).toLocaleDateString()}</p>
+                                                        </div>
+                                                    </div>
+                                                )}
                                             </div>
                                         )}
                                     </div>
@@ -456,8 +603,8 @@ const Show: React.FC = () => {
                             <TabsList className="grid w-full grid-cols-5 gap-4 bg-gray-100 p-3 rounded-lg">
                                 <TabsTrigger value="activity" className="rounded-md px-4 py-3">Activity</TabsTrigger>
                                 <TabsTrigger value="deals" className="rounded-md px-4 py-3">Positions    </TabsTrigger>
-                                <TabsTrigger value="documents" className="rounded-md px-4 py-3">General Docs</TabsTrigger>
-                                <TabsTrigger value="personal-documents" className="rounded-md px-4 py-3">Personal Docs</TabsTrigger>
+                                {/* <TabsTrigger value="documents" className="rounded-md px-4 py-3">General Docs</TabsTrigger> */}
+                                <TabsTrigger value="personal-documents" className="rounded-md px-4 py-3"> Documents</TabsTrigger>
                                 <TabsTrigger value="logs" className="rounded-md px-4 py-3">Logs</TabsTrigger>
                             </TabsList>
 

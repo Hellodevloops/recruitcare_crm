@@ -21,6 +21,7 @@ class DealController extends Controller
             'candidate', 
             'brand', 
             'position', 
+            'hr',
             'pipeline', 
             'stage'
         ])
@@ -64,6 +65,7 @@ class DealController extends Controller
             'candidate_id' => 'required|exists:candidates,id',
             'brand_id' => 'required|exists:brands,id',
             'position_id' => 'required|exists:positions,id',
+            'hr_id' => 'nullable|exists:hr,id',
             'pipeline_id' => 'required|exists:pipelines,id',
             'stage_id' => 'required|exists:stages,id',
             'title' => 'required|string|max:255',
@@ -75,7 +77,7 @@ class DealController extends Controller
         ]);
 
         $deal = Deal::create($validated);
-        $deal->load(['brand', 'position', 'pipeline', 'stage', 'candidate']);
+        $deal->load(['brand', 'position', 'hr', 'pipeline', 'stage', 'candidate']);
 
         if ($request->expectsJson()) {
             return response()->json([
@@ -96,18 +98,23 @@ class DealController extends Controller
             'candidate_id' => 'required|exists:candidates,id',
             'brand_id' => 'required|exists:brands,id',
             'position_id' => 'required|exists:positions,id',
+            'hr_id' => 'nullable|exists:hr,id',
             'pipeline_id' => 'required|exists:pipelines,id',
             'stage_id' => 'required|exists:stages,id',
         ]);
 
         $deal = Deal::create($validated);
+        $deal->load(['brand', 'position', 'hr', 'pipeline', 'stage']);
 
-        return response()->json($deal->load(['brand', 'position', 'pipeline', 'stage']), 201);
+        return response()->json([
+            'message' => 'Deal created successfully',
+            'deal' => $deal
+        ], 201);
     }
 
     public function show(Deal $deal)
     {
-        $deal->load(['brand', 'position', 'pipeline', 'stage']);
+        $deal->load(['brand', 'position', 'hr', 'pipeline', 'stage']);
         return response()->json($deal);
     }
 
@@ -116,12 +123,13 @@ class DealController extends Controller
         $validated = $request->validate([
             'brand_id' => 'sometimes|exists:brands,id',
             'position_id' => 'sometimes|exists:positions,id',
+            'hr_id' => 'nullable|exists:hr,id',
             'stage_id' => 'sometimes|exists:stages,id',
             'pipeline_id' => 'sometimes|exists:pipelines,id',
         ]);
 
         $deal->update(array_filter($validated));
-        $deal->load(['brand', 'position', 'pipeline', 'stage']);
+        $deal->load(['brand', 'position', 'hr', 'pipeline', 'stage']);
 
         if ($request->expectsJson()) {
             return response()->json([

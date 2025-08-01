@@ -18,6 +18,7 @@ const PERSONAL_DOCUMENT_TYPES = [
     { value: 'aadhar_card', label: 'Aadhar Card', icon: CreditCard },
     { value: 'experience_certificate', label: 'Experience Certificate', icon: Building },
     { value: 'salary_slip', label: 'Salary Slip', icon: FileText },
+    { value: 'other_documents', label: 'Other Documents', icon: FileText },
 ];
 
 const PersonalDocumentsSection: React.FC<PersonalDocumentsSectionProps> = ({ candidate, setCandidate }) => {
@@ -133,7 +134,7 @@ const PersonalDocumentsSection: React.FC<PersonalDocumentsSectionProps> = ({ can
         const docType = PERSONAL_DOCUMENT_TYPES.find(type => 
             documentName.toLowerCase().includes(type.value.replace('_', ' '))
         );
-        return docType ? docType.label : 'Personal Document';
+        return docType ? docType.label : 'Other Documents';
     };
 
     const getDocumentIcon = (documentName: string) => {

@@ -96,9 +96,18 @@ class CandidateController extends Controller
 }
 public function show(Candidate $candidate)
 {
-    $candidate->load(['deals', 'activities', 'notes', 'documents', 'positions']);
+    $candidate->load(['deals.brand', 'deals.position', 'deals.hr', 'deals.pipeline', 'deals.stage', 'activities', 'notes', 'documents', 'positions', 'owner']);
     
     return Inertia::render('candidates/Show', [
+        'candidate' => $candidate,
+    ]);
+}
+
+public function getCandidateData(Candidate $candidate)
+{
+    $candidate->load(['deals.brand', 'deals.position', 'deals.hr', 'deals.pipeline', 'deals.stage', 'activities', 'notes', 'documents', 'positions', 'owner']);
+    
+    return response()->json([
         'candidate' => $candidate,
     ]);
 }
@@ -197,32 +206,33 @@ public function logs(Candidate $candidate)
     }
 
     public function edit(Candidate $candidate)
-    {
-        $candidate->load(['positions']);
-        
-        return Inertia::render('candidates/Edit', [
-            'candidate' => $candidate,
-        ]);
-    }
+{
+    $candidate->load(['positions', 'owner']);
+    
+    return Inertia::render('candidates/Edit', [
+        'candidate' => $candidate,
+    ]);
+}
 
     public function store(Request $request)
     {
         $data = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:candidates,email',
-            'phone' => 'nullable|string|max:20',
+            'phone' => 'required|string|max:20|unique:candidates,phone',
             'company_name' => 'nullable|string|max:255',
-            'position' => 'nullable|string|max:255',
+            'designations' => 'nullable|array',
+            'designations.*.title' => 'required|string|max:255',
+            'designations.*.company' => 'nullable|string|max:255',
+            'designations.*.description' => 'nullable|string',
+            'designations.*.start_date' => 'nullable|date',
+            'designations.*.end_date' => 'nullable|date',
+            'designations.*.is_current' => 'nullable|boolean',
             'status' => 'nullable|string|max:50',
+            'current_ctc' => 'nullable|numeric|min:0|max:99999999.99',
+            'expected_ctc' => 'nullable|numeric|min:0|max:99999999.99',
             'resume' => 'nullable|file|mimes:pdf|max:2048',
             'documents.*' => 'nullable|file|mimes:pdf,doc,docx,txt,jpg,jpeg,png|max:2048',
-            'positions' => 'nullable|array',
-            'positions.*.title' => 'required|string|max:255',
-            'positions.*.company' => 'nullable|string|max:255',
-            'positions.*.description' => 'nullable|string',
-            'positions.*.start_date' => 'nullable|date',
-            'positions.*.end_date' => 'nullable|date',
-            'positions.*.is_current' => 'nullable|boolean',
         ]);
 
         // Handle resume upload
@@ -248,23 +258,19 @@ public function logs(Candidate $candidate)
         // Set the owner_id to the currently authenticated user
         $data['owner_id'] = auth()->id();
 
+        // Clean and format phone number
+        if (isset($data['phone'])) {
+            $data['phone'] = preg_replace('/[^0-9+]/', '', $data['phone']);
+        }
+
+        // Handle designations - store as array with work experience data
+        if ($request->has('designations')) {
+            $data['designations'] = array_filter($request->designations, function($designation) {
+                return !empty($designation['title']); // Only keep designations with titles
+            });
+        }
+
         $candidate = Candidate::create($data);
-
-        // Handle positions - create a position record if position field is provided
-        if ($request->filled('position')) {
-            $candidate->positions()->create([
-                'title' => $request->position,
-                'company' => $request->company_name,
-                'is_current' => true,
-            ]);
-        }
-
-        // Handle additional positions array
-        if ($request->has('positions')) {
-            foreach ($request->positions as $positionData) {
-                $candidate->positions()->create($positionData);
-            }
-        }
 
         return redirect()->route('candidates.index')
             ->with('success', 'Candidate created successfully.');
@@ -275,19 +281,20 @@ public function logs(Candidate $candidate)
         $data = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:candidates,email,' . $candidate->id,
-            'phone' => 'nullable|string|max:20',
+            'phone' => 'required|string|max:20|unique:candidates,phone,' . $candidate->id,
             'company_name' => 'nullable|string|max:255',
-            'position' => 'nullable|string|max:255',
+            'designations' => 'nullable|array',
+            'designations.*.title' => 'required|string|max:255',
+            'designations.*.company' => 'nullable|string|max:255',
+            'designations.*.description' => 'nullable|string',
+            'designations.*.start_date' => 'nullable|date',
+            'designations.*.end_date' => 'nullable|date',
+            'designations.*.is_current' => 'nullable|boolean',
             'status' => 'nullable|string|max:50',
+            'current_ctc' => 'nullable|numeric|min:0|max:99999999.99',
+            'expected_ctc' => 'nullable|numeric|min:0|max:99999999.99',
             'resume' => 'nullable|file|mimes:pdf|max:2048',
             'documents.*' => 'nullable|file|mimes:pdf,doc,docx,txt,jpg,jpeg,png|max:2048',
-            'positions' => 'nullable|array',
-            'positions.*.title' => 'required|string|max:255',
-            'positions.*.company' => 'nullable|string|max:255',
-            'positions.*.description' => 'nullable|string',
-            'positions.*.start_date' => 'nullable|date',
-            'positions.*.end_date' => 'nullable|date',
-            'positions.*.is_current' => 'nullable|boolean',
         ]);
 
         // Handle resume upload
@@ -314,26 +321,19 @@ public function logs(Candidate $candidate)
         }
         $data['documents'] = $documents;
 
+        // Clean and format phone number
+        if (isset($data['phone'])) {
+            $data['phone'] = preg_replace('/[^0-9+]/', '', $data['phone']);
+        }
+
+        // Handle designations - store as array with work experience data
+        if ($request->has('designations')) {
+            $data['designations'] = array_filter($request->designations, function($designation) {
+                return !empty($designation['title']); // Only keep designations with titles
+            });
+        }
+
         $candidate->update($data);
-
-        // Handle positions - delete existing positions first
-        $candidate->positions()->delete();
-
-        // Create a position record if position field is provided
-        if ($request->filled('position')) {
-            $candidate->positions()->create([
-                'title' => $request->position,
-                'company' => $request->company_name,
-                'is_current' => true,
-            ]);
-        }
-
-        // Handle additional positions array
-        if ($request->has('positions')) {
-            foreach ($request->positions as $positionData) {
-                $candidate->positions()->create($positionData);
-            }
-        }
 
         return redirect()->route('candidates.show', $candidate)
             ->with('success', 'Candidate updated successfully.');
@@ -357,5 +357,47 @@ public function logs(Candidate $candidate)
         $candidate->update($validated);
 
         return response()->json($candidate);
+    }
+
+    public function checkPhone(Request $request)
+    {
+        $request->validate([
+            'phone' => 'required|string|max:20',
+        ]);
+
+        $phone = $request->phone;
+        
+        // Clean and format phone number (remove spaces, dashes, etc.)
+        $phone = preg_replace('/[^0-9+]/', '', $phone);
+        
+        // Check if candidate with this phone number exists
+        $candidate = Candidate::where('phone', $phone)->with('owner')->first();
+        
+        if ($candidate) {
+            return response()->json([
+                'exists' => true,
+                'candidate_id' => $candidate->id,
+                'candidate' => [
+                    'id' => $candidate->id,
+                    'name' => $candidate->name,
+                    'email' => $candidate->email,
+                    'phone' => $candidate->phone,
+                    'company_name' => $candidate->company_name,
+                    'status' => $candidate->status,
+                    'owner' => $candidate->owner ? [
+                        'id' => $candidate->owner->id,
+                        'name' => $candidate->owner->name
+                    ] : null,
+                    'created_at' => $candidate->created_at->format('Y-m-d H:i:s'),
+                    'updated_at' => $candidate->updated_at->format('Y-m-d H:i:s')
+                ],
+                'message' => 'Candidate with this phone number already exists.'
+            ]);
+        }
+        
+        return response()->json([
+            'exists' => false,
+            'message' => 'Phone number is available for new candidate.'
+        ]);
     }
 }

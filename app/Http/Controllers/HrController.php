@@ -47,4 +47,17 @@ class HrController extends Controller
             'brand' => $brand
         ]);
     }
+
+    public function getHrData(Request $request)
+    {
+        $brandId = $request->query('brand_id');
+        
+        if ($brandId) {
+            $hrs = Hr::where('brand_id', $brandId)->get(['id', 'name', 'email']);
+        } else {
+            $hrs = Hr::with('brand')->get(['id', 'name', 'email', 'brand_id']);
+        }
+        
+        return response()->json($hrs);
+    }
 } 

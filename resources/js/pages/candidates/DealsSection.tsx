@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Trash2, Plus, ChevronUp, Briefcase, Edit, ChevronLeft, ChevronRight } from 'lucide-react';
 import axios from 'axios';
-import { Candidate, Brand, Position, Pipeline, Stage } from '@/types';
+import { Candidate, Brand, Position, Pipeline, Stage, Hr } from '@/types';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
@@ -23,12 +23,14 @@ interface Deal {
     candidate_id: number;
     brand_id: number;
     position_id: number;
+    hr_id?: number;
     pipeline_id: number;
     stage_id: number;
     created_at: string;
     updated_at: string;
     brand?: Brand;
     position?: Position;
+    hr?: Hr;
     pipeline?: Pipeline;
     stage?: Stage;
 }
@@ -36,6 +38,7 @@ interface Deal {
 interface NewDeal {
     brand_id: string;
     position_id: string;
+    hr_id: string;
     pipeline_id: string;
     stage_id: string;
 }
@@ -97,6 +100,12 @@ const DealItem: React.FC<{
                                     <span>{dealData.pipeline?.name || 'Loading...'}</span>
                                     <span>•</span>
                                     <span>{dealData.stage?.name || 'Loading...'}</span>
+                                    {dealData.hr && (
+                                        <>
+                                            <span>•</span>
+                                            <span className="text-indigo-600 dark:text-indigo-400">{dealData.hr.name}</span>
+                                        </>
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -147,11 +156,13 @@ const DealsSection: React.FC<DealsSectionProps> = ({ candidate, setCandidate }) 
     const [newDeal, setNewDeal] = useState<NewDeal>({
         brand_id: '',
         position_id: '',
+        hr_id: '',
         pipeline_id: '',
         stage_id: '',
     });
     const [brands, setBrands] = useState<Brand[]>([]);
     const [positions, setPositions] = useState<Position[]>([]);
+    const [hrs, setHrs] = useState<Hr[]>([]);
     const [pipelines, setPipelines] = useState<Pipeline[]>([]);
     const [stages, setStages] = useState<Stage[]>([]);
     const [isFormOpen, setIsFormOpen] = useState<boolean>(false);
@@ -201,6 +212,17 @@ const DealsSection: React.FC<DealsSectionProps> = ({ candidate, setCandidate }) 
         }
     };
 
+    // Fetch HR when brand changes
+    const fetchHrs = async (brandId: string) => {
+        if (!brandId) return;
+        try {
+            const response = await axios.get<Hr[]>(`/hr-data?brand_id=${brandId}`);
+            setHrs(response.data);
+        } catch (error) {
+            console.error('Failed to fetch HR:', error);
+        }
+    };
+
     // Fetch pipelines on mount
     useEffect(() => {
         const fetchPipelines = async () => {
@@ -228,8 +250,8 @@ const DealsSection: React.FC<DealsSectionProps> = ({ candidate, setCandidate }) 
     // Refetch candidate deals to sync with server
     const refetchDeals = async () => {
         try {
-            const response = await axios.get<{ data: Candidate }>(`/candidates/${candidate.id}`);
-            setCandidate(response.data.data);
+            const response = await axios.get<{ candidate: Candidate }>(`/candidates/${candidate.id}/data`);
+            setCandidate(response.data.candidate);
             // Sorting will be handled by useEffect
         } catch (error) {
             console.error('Failed to refetch deals:', error);
@@ -258,6 +280,7 @@ const DealsSection: React.FC<DealsSectionProps> = ({ candidate, setCandidate }) 
         const errors: { [key: string]: string } = {};
         if (!newDeal.brand_id) errors.brand_id = 'Please select a brand';
         if (!newDeal.position_id) errors.position_id = 'Please select a position';
+        if (!newDeal.hr_id) errors.hr_id = 'Please select an HR';
         if (!newDeal.pipeline_id) errors.pipeline_id = 'Please select a pipeline';
         if (!newDeal.stage_id) errors.stage_id = 'Please select a stage';
         setFormErrors(errors);
@@ -269,6 +292,7 @@ const DealsSection: React.FC<DealsSectionProps> = ({ candidate, setCandidate }) 
         const errors: { [key: string]: string } = {};
         if (!editFormData.brand_id) errors.brand_id = 'Please select a brand';
         if (!editFormData.position_id) errors.position_id = 'Please select a position';
+        if (!editFormData.hr_id) errors.hr_id = 'Please select an HR';
         if (!editFormData.pipeline_id) errors.pipeline_id = 'Please select a pipeline';
         if (!editFormData.stage_id) errors.stage_id = 'Please select a stage';
         setFormErrors(errors);
@@ -281,15 +305,20 @@ const DealsSection: React.FC<DealsSectionProps> = ({ candidate, setCandidate }) 
 
         setIsLoading(true);
         try {
-            const response = await axios.post<Deal>('/deals', {
+            const response = await axios.post<{message: string; deal: Deal}>('/deals_store_in_candidate', {
                 candidate_id: candidate.id,
                 brand_id: parseInt(newDeal.brand_id),
                 position_id: parseInt(newDeal.position_id),
+                hr_id: parseInt(newDeal.hr_id),
                 pipeline_id: parseInt(newDeal.pipeline_id),
                 stage_id: parseInt(newDeal.stage_id),
             });
 
-            const newDealData = response.data;
+            const { deal: newDealData, message } = response.data;
+            
+            // Show success message
+            toast.success(message || 'Deal created successfully');
+            
             setLocalDeals(prevDeals => [newDealData, ...prevDeals]);
             setCandidate({
                 ...candidate,
@@ -303,7 +332,7 @@ const DealsSection: React.FC<DealsSectionProps> = ({ candidate, setCandidate }) 
             setCurrentPage(1); // Reset to first page to show the new deal
         } catch (error) {
             console.error('Failed to add deal:', error);
-            await refetchDeals();
+            toast.error('Failed to create deal. Please try again.');
         } finally {
             setIsLoading(false);
         }
@@ -314,6 +343,7 @@ const DealsSection: React.FC<DealsSectionProps> = ({ candidate, setCandidate }) 
         setNewDeal({
             brand_id: '',
             position_id: '',
+            hr_id: '',
             pipeline_id: '',
             stage_id: '',
         });
@@ -321,6 +351,7 @@ const DealsSection: React.FC<DealsSectionProps> = ({ candidate, setCandidate }) 
         setIsFormOpen(false);
         setStages([]);
         setPositions([]);
+        setHrs([]);
     };
 
     // Reset edit form
@@ -331,6 +362,7 @@ const DealsSection: React.FC<DealsSectionProps> = ({ candidate, setCandidate }) 
         setFormErrors({});
         setStages([]);
         setPositions([]);
+        setHrs([]);
     };
 
     // Handle opening edit modal
@@ -339,11 +371,13 @@ const DealsSection: React.FC<DealsSectionProps> = ({ candidate, setCandidate }) 
         setEditFormData({
             brand_id: deal.brand_id.toString(),
             position_id: deal.position_id.toString(),
+            hr_id: deal.hr_id?.toString() || '',
             pipeline_id: deal.pipeline_id.toString(),
             stage_id: deal.stage_id.toString(),
         });
         fetchStages(deal.pipeline_id.toString());
         fetchPositions(deal.brand_id.toString());
+        fetchHrs(deal.brand_id.toString());
         setIsEditModalOpen(true);
     };
 
@@ -356,6 +390,7 @@ const DealsSection: React.FC<DealsSectionProps> = ({ candidate, setCandidate }) 
             const response = await axios.put<{message: string; deal: Deal}>(`/deals/${editingDeal.id}`, {
                 brand_id: parseInt(editFormData.brand_id!),
                 position_id: parseInt(editFormData.position_id!),
+                hr_id: parseInt(editFormData.hr_id!),
                 pipeline_id: parseInt(editFormData.pipeline_id!),
                 stage_id: parseInt(editFormData.stage_id!),
             });
@@ -428,14 +463,18 @@ const DealsSection: React.FC<DealsSectionProps> = ({ candidate, setCandidate }) 
     const handleBrandChange = (value: string) => {
         handleInputChange('brand_id', value);
         handleInputChange('position_id', '');
+        handleInputChange('hr_id', '');
         fetchPositions(value);
+        fetchHrs(value);
     };
 
     // Handle edit brand selection
     const handleEditBrandChange = (value: string) => {
         handleEditInputChange('brand_id', value);
         handleEditInputChange('position_id', '');
+        handleEditInputChange('hr_id', '');
         fetchPositions(value);
+        fetchHrs(value);
     };
 
     // Handle position selection
@@ -602,6 +641,43 @@ const DealsSection: React.FC<DealsSectionProps> = ({ candidate, setCandidate }) 
                                                 </SelectContent>
                                             </Select>
                                             {formErrors.position_id && <p className="text-xs text-red-500 mt-1">{formErrors.position_id}</p>}
+                                        </div>
+
+                                        {/* HR Dropdown */}
+                                        <div className="space-y-1">
+                                            <Label htmlFor="hr" className={`text-sm font-medium ${formErrors.hr_id ? 'text-red-500' : 'text-gray-700'}`}>
+                                                HR*
+                                            </Label>
+                                            <Select
+                                                value={newDeal.hr_id}
+                                                onValueChange={(value) => handleInputChange('hr_id', value)}
+                                                disabled={!newDeal.brand_id}
+                                            >
+                                                <SelectTrigger
+                                                    id="hr"
+                                                    className={`bg-white border ${formErrors.hr_id ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : 'border-gray-200 focus:ring-indigo-500 focus:border-indigo-500'} rounded-md text-sm`}
+                                                >
+                                                    <SelectValue placeholder={!newDeal.brand_id ? 'Select a brand first' : 'Select HR'} />
+                                                </SelectTrigger>
+                                                <SelectContent className="bg-white border-gray-200 rounded-md shadow-lg">
+                                                    {hrs.length > 0 ? (
+                                                        hrs.map((hr) => (
+                                                            <SelectItem
+                                                                key={hr.id}
+                                                                value={hr.id.toString()}
+                                                                className="hover:bg-indigo-50 text-sm"
+                                                            >
+                                                                {hr.name}
+                                                            </SelectItem>
+                                                        ))
+                                                    ) : (
+                                                        <SelectItem value="loading" disabled className="text-sm text-gray-400">
+                                                            {newDeal.brand_id ? 'Loading HR...' : 'Select a brand first'}
+                                                        </SelectItem>
+                                                    )}
+                                                </SelectContent>
+                                            </Select>
+                                            {formErrors.hr_id && <p className="text-xs text-red-500 mt-1">{formErrors.hr_id}</p>}
                                         </div>
 
                                         {/* Pipeline Dropdown */}
@@ -878,6 +954,43 @@ const DealsSection: React.FC<DealsSectionProps> = ({ candidate, setCandidate }) 
                                         </SelectContent>
                                     </Select>
                                     {formErrors.position_id && <p className="text-xs text-red-500 mt-1">{formErrors.position_id}</p>}
+                                </div>
+
+                                {/* HR Dropdown */}
+                                <div className="space-y-1">
+                                    <Label htmlFor="edit-hr" className={`text-sm font-medium ${formErrors.hr_id ? 'text-red-500' : 'text-gray-700'}`}>
+                                        HR*
+                                    </Label>
+                                    <Select
+                                        value={editFormData.hr_id || ''}
+                                        onValueChange={(value) => handleEditInputChange('hr_id', value)}
+                                        disabled={!editFormData.brand_id}
+                                    >
+                                        <SelectTrigger
+                                            id="edit-hr"
+                                            className={`bg-white border ${formErrors.hr_id ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : 'border-gray-200 focus:ring-indigo-500 focus:border-indigo-500'} rounded-md text-sm`}
+                                        >
+                                            <SelectValue placeholder={!editFormData.brand_id ? 'Select a brand first' : 'Select HR'} />
+                                        </SelectTrigger>
+                                        <SelectContent className="bg-white border-gray-200 rounded-md shadow-lg">
+                                            {hrs.length > 0 ? (
+                                                hrs.map((hr) => (
+                                                    <SelectItem
+                                                        key={hr.id}
+                                                        value={hr.id.toString()}
+                                                        className="hover:bg-indigo-50 text-sm"
+                                                    >
+                                                        {hr.name}
+                                                    </SelectItem>
+                                                ))
+                                            ) : (
+                                                <SelectItem value="loading" disabled className="text-sm text-gray-400">
+                                                    {editFormData.brand_id ? 'Loading HR...' : 'Select a brand first'}
+                                                </SelectItem>
+                                            )}
+                                        </SelectContent>
+                                    </Select>
+                                    {formErrors.hr_id && <p className="text-xs text-red-500 mt-1">{formErrors.hr_id}</p>}
                                 </div>
 
                                 {/* Pipeline Dropdown */}
