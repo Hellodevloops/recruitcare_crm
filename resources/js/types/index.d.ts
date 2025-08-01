@@ -51,7 +51,17 @@ export interface Candidate {
     state?: string;
     country?: string;
     company_name?: string;
+    designations?: Array<{
+        title: string;
+        company?: string;
+        description?: string;
+        start_date?: string;
+        end_date?: string;
+        is_current?: boolean;
+    }>;
     status?: 'interested' | 'not_interested' | 'dnd' | 'followup';
+    current_ctc?: number;
+    expected_ctc?: number;
     resume?: string;
     owner: { id: number; name: string };
     created_at: string;
@@ -69,12 +79,14 @@ export interface Deal {
     candidate_id: number;
     brand_id: number;
     position_id: number;
+    hr_id?: number;
     pipeline_id: number;
     stage_id: number;
     created_at: string;
     updated_at: string;
     brand?: Brand;
     position?: Position;
+    hr?: Hr;
     pipeline?: Pipeline;
     stage?: Stage;
 }
@@ -133,6 +145,16 @@ export interface Brand {
 export interface Position {
     id: number;
     title: string;
+    brand_id: number;
+    hr_id: number;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface Hr {
+    id: number;
+    name: string;
+    email: string;
     brand_id: number;
     created_at: string;
     updated_at: string;
