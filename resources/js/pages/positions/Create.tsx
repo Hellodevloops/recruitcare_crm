@@ -68,13 +68,13 @@ export default function Create({ brands, hrs }: Props) {
                     <CardContent>
                         <form onSubmit={handleSubmit} className="space-y-4">
                             <div className="space-y-2">
-                                <Label>Brand</Label>
+                                <Label>Brand (Optional)</Label>
                                 <Select
                                     value={data.brand_id}
                                     onValueChange={(value) => setData('brand_id', value)}
                                 >
                                     <SelectTrigger>
-                                        <SelectValue placeholder="Select Brand" />
+                                        <SelectValue placeholder="Select Brand (Optional)" />
                                     </SelectTrigger>
                                     <SelectContent>
                                         {brands.map((brand) => (
@@ -88,14 +88,14 @@ export default function Create({ brands, hrs }: Props) {
                             </div>
 
                             <div className="space-y-2">
-                                <Label>HR</Label>
+                                <Label>HR (Optional)</Label>
                                 <Select
                                     value={data.hr_id}
                                     onValueChange={(value) => setData('hr_id', value)}
                                     disabled={!data.brand_id}
                                 >
                                     <SelectTrigger>
-                                        <SelectValue placeholder="Select HR" />
+                                        <SelectValue placeholder="Select HR (Optional)" />
                                     </SelectTrigger>
                                     <SelectContent>
                                         {availableHrs.map((hr) => (
@@ -109,51 +109,55 @@ export default function Create({ brands, hrs }: Props) {
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="title">Title</Label>
+                                <Label htmlFor="title">Title <span className="text-red-500">*</span></Label>
                                 <Input
                                     id="title"
                                     type="text"
                                     value={data.title}
                                     onChange={e => setData('title', e.target.value)}
+                                    required
                                 />
                                 {errors.title && <div className="text-red-500">{errors.title}</div>}
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="experience">Experience</Label>
+                                <Label htmlFor="experience">Experience (Optional)</Label>
                                 <Input
                                     id="experience"
                                     type="text"
                                     value={data.experience}
                                     onChange={e => setData('experience', e.target.value)}
+                                    placeholder="Enter experience requirements"
                                 />
                                 {errors.experience && <div className="text-red-500">{errors.experience}</div>}
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="store">Store</Label>
+                                <Label htmlFor="store">Store (Optional)</Label>
                                 <Input
                                     id="store"
                                     type="text"
                                     value={data.store}
                                     onChange={e => setData('store', e.target.value)}
+                                    placeholder="Enter store name"
                                 />
                                 {errors.store && <div className="text-red-500">{errors.store}</div>}
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="city">City</Label>
+                                <Label htmlFor="city">City (Optional)</Label>
                                 <Input
                                     id="city"
                                     type="text"
                                     value={data.city}
                                     onChange={e => setData('city', e.target.value)}
+                                    placeholder="Enter city"
                                 />
                                 {errors.city && <div className="text-red-500">{errors.city}</div>}
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="budget">Budget (₹)</Label>
+                                <Label htmlFor="budget">Budget (₹) (Optional)</Label>
                                 <div className="relative">
                                     <span className="absolute left-3 top-1/2 -translate-y-1/2">₹</span>
                                     <Input
@@ -163,18 +167,20 @@ export default function Create({ brands, hrs }: Props) {
                                         value={data.budget}
                                         onChange={e => setData('budget', e.target.value)}
                                         className="pl-7"
+                                        placeholder="Enter budget amount"
                                     />
                                 </div>
                                 {errors.budget && <div className="text-red-500">{errors.budget}</div>}
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="designation">Designation</Label>
+                                <Label htmlFor="designation">Designation (Optional)</Label>
                                 <Input
                                     id="designation"
                                     type="text"
                                     value={data.designation}
                                     onChange={e => setData('designation', e.target.value)}
+                                    placeholder="Enter designation"
                                 />
                                 {errors.designation && <div className="text-red-500">{errors.designation}</div>}
                             </div>

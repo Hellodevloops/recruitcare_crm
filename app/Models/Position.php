@@ -39,4 +39,9 @@ class Position extends Model
     {
         return $this->belongsTo(Candidate::class);
     }
+
+    public function deals()
+    {
+        return $this->hasMany(Deal::class);
+    }
 }

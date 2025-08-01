@@ -29,11 +29,11 @@ interface Position {
         email: string;
     } | null;
     title: string;
-    experience: string;
-    store: string;
-    city: string;
-    budget: number;
-    designation: string;
+    experience: string | null;
+    store: string | null;
+    city: string | null;
+    budget: number | null;
+    designation: string | null;
 }
 
 interface Props extends PageProps {
@@ -86,13 +86,20 @@ export default function Index({ positions = [] }: Props) {
                                             <TableCell>{position.title}</TableCell>
                                             <TableCell>{position.brand?.name || 'N/A'}</TableCell>
                                             <TableCell>{position.hr?.email || 'N/A'}</TableCell>
-                                            <TableCell>{position.experience}</TableCell>
-                                            <TableCell>{position.store}</TableCell>
-                                            <TableCell>{position.city}</TableCell>
-                                            <TableCell>₹{position.budget.toLocaleString('en-IN')}</TableCell>
-                                            <TableCell>{position.designation}</TableCell>
+                                            <TableCell>{position.experience || 'N/A'}</TableCell>
+                                            <TableCell>{position.store || 'N/A'}</TableCell>
+                                            <TableCell>{position.city || 'N/A'}</TableCell>
+                                            <TableCell>
+                                                {position.budget ? `₹${position.budget.toLocaleString('en-IN')}` : 'N/A'}
+                                            </TableCell>
+                                            <TableCell>{position.designation || 'N/A'}</TableCell>
                                             <TableCell>
                                                 <div className="flex gap-2 justify-end">
+                                                    <Link href={`/positions/${position.id}`}>
+                                                        <Button variant="outline" size="sm">
+                                                            View
+                                                        </Button>
+                                                    </Link>
                                                     <Link href={`/positions/${position.id}/edit`}>
                                                         <Button variant="outline" size="sm">
                                                             Edit

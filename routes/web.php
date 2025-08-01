@@ -103,8 +103,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/positions', [PositionController::class, 'index'])->name('positions.index');
     Route::get('/positions/create', [PositionController::class, 'create'])->name('positions.create');
     Route::post('/positions', [PositionController::class, 'store'])->name('positions.store');
+    Route::get('/positions/{position}', [PositionController::class, 'show'])->name('positions.show');
     Route::get('/positions/{position}/edit', [PositionController::class, 'edit'])->name('positions.edit');
     Route::put('/positions/{position}', [PositionController::class, 'update'])->name('positions.update');
+    Route::post('/positions/{position}/send-candidate-info', [PositionController::class, 'sendCandidateInfoToHr'])->name('positions.send-candidate-info');
     Route::delete('/positions/{position}', [PositionController::class, 'destroy'])->name('positions.destroy');
     Route::get('/positions-data', [PositionController::class, 'getPositionsData'])->name('positions.data');
 

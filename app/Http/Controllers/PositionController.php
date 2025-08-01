@@ -5,8 +5,11 @@ namespace App\Http\Controllers;
 use App\Models\Position;
 use App\Models\Brand;
 use App\Models\Hr;
+use App\Models\Candidate;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use App\Mail\SendCandidateInfoToHr;
+use Illuminate\Support\Facades\Mail;
 
 class PositionController extends Controller
 {
@@ -48,20 +51,66 @@ class PositionController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'brand_id' => 'required|exists:brands,id',
-            'hr_id' => 'required|exists:hr,id',
+            'brand_id' => 'nullable|exists:brands,id',
+            'hr_id' => 'nullable|exists:hr,id',
             'title' => 'required|string|max:255',
-            'experience' => 'required|string|max:255',
-            'store' => 'required|string|max:255',
-            'city' => 'required|string|max:255',
-            'budget' => 'required|numeric|min:0',
-            'designation' => 'required|string|max:255',
+            'experience' => 'nullable|string|max:255',
+            'store' => 'nullable|string|max:255',
+            'city' => 'nullable|string|max:255',
+            'budget' => 'nullable|numeric|min:0',
+            'designation' => 'nullable|string|max:255',
         ]);
 
-        Position::create($validated);
+        // Convert empty strings to null for optional fields
+        $data = array_map(function ($value) {
+            return $value === '' ? null : $value;
+        }, $validated);
+
+        Position::create($data);
 
         return redirect()->route('positions.index')
             ->with('success', 'Position created successfully.');
+    }
+
+    public function show(Position $position)
+    {
+        $position->load([
+            'brand',
+            'hr',
+            'candidate',
+            'deals.candidate',
+            'deals.brand',
+            'deals.hr',
+            'deals.pipeline',
+            'deals.stage'
+        ]);
+
+        // Get related candidates from deals with same brand_id and hr_id
+        $relatedCandidates = [];
+        if ($position->brand_id) {
+            $query = \App\Models\Deal::where('brand_id', $position->brand_id)
+                ->whereNotNull('candidate_id')
+                ->with(['candidate' => function($query) {
+                    $query->select('id', 'name', 'email', 'phone', 'company_name', 'status');
+                }]);
+            
+            // If hr_id is also available, filter by both
+            if ($position->hr_id) {
+                $query->where('hr_id', $position->hr_id);
+            }
+            
+            $relatedCandidates = $query->get()
+                ->pluck('candidate')
+                ->filter() // Remove null candidates
+                ->unique('id')
+                ->values()
+                ->toArray();
+        }
+        
+        return Inertia::render('positions/Show', [
+            'position' => $position,
+            'relatedCandidates' => $relatedCandidates
+        ]);
     }
 
     public function edit(Position $position)
@@ -79,20 +128,45 @@ class PositionController extends Controller
     public function update(Request $request, Position $position)
     {
         $validated = $request->validate([
-            'brand_id' => 'required|exists:brands,id',
-            'hr_id' => 'required|exists:hr,id',
+            'brand_id' => 'nullable|exists:brands,id',
+            'hr_id' => 'nullable|exists:hr,id',
             'title' => 'required|string|max:255',
-            'experience' => 'required|string|max:255',
-            'store' => 'required|string|max:255',
-            'city' => 'required|string|max:255',
-            'budget' => 'required|numeric|min:0',
-            'designation' => 'required|string|max:255',
+            'experience' => 'nullable|string|max:255',
+            'store' => 'nullable|string|max:255',
+            'city' => 'nullable|string|max:255',
+            'budget' => 'nullable|numeric|min:0',
+            'designation' => 'nullable|string|max:255',
         ]);
 
-        $position->update($validated);
+        // Convert empty strings to null for optional fields
+        $data = array_map(function ($value) {
+            return $value === '' ? null : $value;
+        }, $validated);
+
+        $position->update($data);
 
         return redirect()->route('positions.index')
             ->with('success', 'Position updated successfully.');
+    }
+
+    public function sendCandidateInfoToHr(Request $request, Position $position)
+    {
+        $request->validate([
+            'candidate_id' => 'required|exists:candidates,id',
+            'hr_email' => 'required|email'
+        ]);
+
+        try {
+            $candidate = Candidate::findOrFail($request->candidate_id);
+            
+            // Send email to HR
+            Mail::to($request->hr_email)->send(new SendCandidateInfoToHr($candidate, $position, $request->hr_email));
+
+            return back()->with('success', 'Candidate information sent successfully to ' . $request->hr_email);
+
+        } catch (\Exception $e) {
+            return back()->with('error', 'Failed to send email: ' . $e->getMessage());
+        }
     }
 
     public function destroy(Position $position)
