@@ -135,7 +135,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/pipelines-data', [PipelineController::class, 'data'])->name('pipelines.data');
 
     // Resource routes for Deals, Activities, Notes, and Documents
-    Route::resource('deals', DealController::class)->only(['index', 'store', 'show', 'update', 'destroy']);
+    Route::resource('deals', DealController::class)->only(['index', 'create', 'store', 'show', 'update', 'destroy']);
     Route::post('deals_store_in_candidate', [DealController::class, 'deals_store_in_candidate'])->name('deals_store_in_candidate');
 
     Route::resource('activities', ActivityController::class)->only(['index', 'store', 'show', 'update', 'destroy']);

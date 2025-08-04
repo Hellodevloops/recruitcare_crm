@@ -59,6 +59,15 @@ class DealController extends Controller
         ]);
     }
 
+    public function create()
+    {
+        $pipelines = Pipeline::all();
+        
+        return inertia('Deals/Create', [
+            'pipelines' => $pipelines,
+        ]);
+    }
+
     public function store(Request $request)
     {
         $validated = $request->validate([
