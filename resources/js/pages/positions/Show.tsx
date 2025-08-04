@@ -5,9 +5,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Separator } from '@/components/ui/separator';
+import { Checkbox } from '@/components/ui/checkbox';
 import AppLayout from '@/layouts/app-layout';
 import { toast } from 'sonner';
-import { Mail, Phone, Building, User, FileText, Download, MapPin, Calendar, AlertTriangle } from 'lucide-react';
+import { Mail, Phone, Building, User, FileText, Download, MapPin, Calendar, AlertTriangle, Send } from 'lucide-react';
 
 interface Brand {
     id: number;
@@ -67,6 +68,67 @@ interface Props {
 
 export default function Show({ position, relatedCandidates }: Props) {
     const [sendingEmail, setSendingEmail] = useState(false);
+    const [selectedCandidates, setSelectedCandidates] = useState<number[]>([]);
+    const [selectAll, setSelectAll] = useState(false);
+
+    // Handle individual candidate selection
+    const handleCandidateSelect = (candidateId: number) => {
+        setSelectedCandidates(prev => {
+            if (prev.includes(candidateId)) {
+                return prev.filter(id => id !== candidateId);
+            } else {
+                return [...prev, candidateId];
+            }
+        });
+    };
+
+    // Handle select all functionality
+    const handleSelectAll = () => {
+        if (selectAll) {
+            setSelectedCandidates([]);
+            setSelectAll(false);
+        } else {
+            setSelectedCandidates(relatedCandidates.map(c => c.id));
+            setSelectAll(true);
+        }
+    };
+
+    // Send multiple candidates info to HR
+    const sendMultipleCandidatesInfoToHr = async () => {
+        if (selectedCandidates.length === 0) {
+            toast.error('Please select at least one candidate');
+            return;
+        }
+
+        setSendingEmail(true);
+        try {
+            router.post(`/positions/${position.id}/send-multiple-candidates-info`, {
+                candidate_ids: selectedCandidates,
+                hr_email: position.hr?.email
+            }, {
+                onSuccess: (page) => {
+                    if ((page.props.flash as any)?.success) {
+                        toast.success((page.props.flash as any).success);
+                        setSelectedCandidates([]);
+                        setSelectAll(false);
+                    } else if ((page.props.flash as any)?.error) {
+                        toast.error((page.props.flash as any).error);
+                    }
+                },
+                onError: (errors) => {
+                    console.error('Email sending errors:', errors);
+                    toast.error('Failed to send email. Please try again.');
+                },
+                onFinish: () => {
+                    setSendingEmail(false);
+                }
+            });
+        } catch (error) {
+            console.error('Email sending error:', error);
+            toast.error('Failed to send email. Please try again.');
+            setSendingEmail(false);
+        }
+    };
 
     const sendCandidateInfoToHr = async (candidateId: number, hrEmail: string) => {
         setSendingEmail(true);
@@ -196,9 +258,34 @@ export default function Show({ position, relatedCandidates }: Props) {
                         <CardHeader>
                             <div className="flex justify-between items-center">
                                 <CardTitle>Candidates</CardTitle>
-                                <Link href="/candidates/create">
-                                    <Button size="sm">Add New Candidate</Button>
-                                </Link>
+                                <div className="flex gap-2">
+                                    {relatedCandidates.length > 0 && position.hr && (
+                                        <div className="flex items-center gap-2">
+                                            <Checkbox
+                                                checked={selectAll}
+                                                onCheckedChange={handleSelectAll}
+                                                id="select-all"
+                                            />
+                                            <label htmlFor="select-all" className="text-sm font-medium">
+                                                Select All
+                                            </label>
+                                            {selectedCandidates.length > 0 && (
+                                                <Button 
+                                                    onClick={sendMultipleCandidatesInfoToHr}
+                                                    disabled={sendingEmail}
+                                                    size="sm"
+                                                    className="bg-green-600 hover:bg-green-700 text-white"
+                                                >
+                                                    <Send className="h-4 w-4 mr-1" />
+                                                    {sendingEmail ? 'Sending...' : `Send ${selectedCandidates.length} to HR`}
+                                                </Button>
+                                            )}
+                                        </div>
+                                    )}
+                                    <Link href="/candidates/create">
+                                        <Button size="sm">Add New Candidate</Button>
+                                    </Link>
+                                </div>
                             </div>
                         </CardHeader>
                         <CardContent>
@@ -210,6 +297,13 @@ export default function Show({ position, relatedCandidates }: Props) {
                                             <div className="flex justify-between items-start mb-4">
                                                 <div className="flex-1">
                                                     <div className="flex items-center gap-3 mb-2">
+                                                        {position.hr && (
+                                                            <Checkbox
+                                                                checked={selectedCandidates.includes(candidate.id)}
+                                                                onCheckedChange={() => handleCandidateSelect(candidate.id)}
+                                                                id={`candidate-${candidate.id}`}
+                                                            />
+                                                        )}
                                                         <h3 className="text-xl font-semibold">{candidate.name}</h3>
                                                         {candidate.status && (
                                                             <Badge variant="secondary">{candidate.status}</Badge>

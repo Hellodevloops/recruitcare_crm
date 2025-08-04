@@ -178,6 +178,32 @@ class PositionController extends Controller
         }
     }
 
+    public function sendMultipleCandidatesInfoToHr(Request $request, Position $position)
+    {
+        $request->validate([
+            'candidate_ids' => 'required|array',
+            'candidate_ids.*' => 'exists:candidates,id',
+            'hr_email' => 'required|email'
+        ]);
+
+        try {
+            $candidates = Candidate::with('documents')->whereIn('id', $request->candidate_ids)->get();
+            
+            if ($candidates->isEmpty()) {
+                return back()->with('error', 'No valid candidates found');
+            }
+
+            // Send email to HR with multiple candidates
+            Mail::to($request->hr_email)->send(new SendCandidateInfoToHr($candidates, $position, $request->hr_email));
+
+            $candidateCount = $candidates->count();
+            return back()->with('success', "Information for {$candidateCount} candidate(s) sent successfully to " . $request->hr_email);
+
+        } catch (\Exception $e) {
+            return back()->with('error', 'Failed to send email: ' . $e->getMessage());
+        }
+    }
+
     public function destroy(Position $position)
     {
         $position->delete();
