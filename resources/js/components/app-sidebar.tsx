@@ -108,23 +108,11 @@ const allNavItems: NavItem[] = [
 ];
 
 // Footer navigation items (no permissions needed)
-const footerNavItems: NavItem[] = [
-    {
-        title: 'Help Center',
-        href: '/help',
-        icon: HelpCircle,
-    },
-    {
-        title: 'Documentation',
-        href: '/documentation',
-        icon: BookOpen,
-    },
-];
+const footerNavItems: NavItem[] = [];
 
 export function AppSidebar() {
     // Access shared Inertia props
     const { props } = usePage();
-    const can = props.auth?.can || [];
 
     // Filter navigation items based on permissions (if you want to add back permissions, add them to NavItem type and here)
     const mainNavItems = allNavItems;
