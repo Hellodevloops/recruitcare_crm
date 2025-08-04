@@ -22,6 +22,7 @@ class User extends Authenticatable
         'email',
         'password',
         'calcom_url', // Add this line
+        'default_pipeline_id',
     ];
 
     /**
@@ -45,5 +46,13 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    /**
+     * Get the user's default pipeline.
+     */
+    public function defaultPipeline()
+    {
+        return $this->belongsTo(Pipeline::class, 'default_pipeline_id');
     }
 }

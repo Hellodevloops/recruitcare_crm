@@ -9,6 +9,7 @@ import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
 
@@ -23,9 +24,21 @@ type ProfileForm = {
     name: string;
     email: string;
     calcom_url: string;
+    default_pipeline_id: string;
 }
 
-export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: boolean; status?: string }) {
+interface Pipeline {
+    id: number;
+    name: string;
+}
+
+interface Props {
+    mustVerifyEmail: boolean;
+    status?: string;
+    pipelines: Pipeline[];
+}
+
+export default function Profile({ mustVerifyEmail, status, pipelines }: Props) {
     const { auth } = usePage<SharedData>().props;
     
     // For debugging - remove in production
@@ -38,12 +51,20 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
         name: auth.user.name,
         email: auth.user.email,
         calcom_url: auth.user.calcom_url || '', // Ensure empty string if null/undefined
+        default_pipeline_id: auth.user.default_pipeline_id?.toString() || 'none',
     });
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
 
+        // Convert 'none' back to empty string for the backend
+        const formData = {
+            ...data,
+            default_pipeline_id: data.default_pipeline_id === 'none' ? '' : data.default_pipeline_id
+        };
+
         patch(route('profile.update'), {
+            data: formData,
             preserveScroll: true,
         });
     };
@@ -104,6 +125,29 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                             <p className="text-xs text-muted-foreground">Example format: boondock-live-y1hibx/30min</p>
 
                             <InputError className="mt-2" message={errors.calcom_url} />
+                        </div>
+
+                        <div className="grid gap-2">
+                            <Label htmlFor="default_pipeline_id">Default Pipeline (optional)</Label>
+
+                            <Select
+                                value={data.default_pipeline_id}
+                                onValueChange={(value) => setData('default_pipeline_id', value)}
+                            >
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select a default pipeline" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="none">No default pipeline</SelectItem>
+                                    {pipelines.map((pipeline) => (
+                                        <SelectItem key={pipeline.id} value={pipeline.id.toString()}>
+                                            {pipeline.name}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+
+                            <InputError className="mt-2" message={errors.default_pipeline_id} />
                         </div>
 
                         {mustVerifyEmail && auth.user.email_verified_at === null && (
