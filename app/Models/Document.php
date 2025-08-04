@@ -9,7 +9,7 @@ class Document extends Model
 {
 
     use LogsActivity;
-    protected $fillable = ['candidate_id', 'file_path', 'name', 'type'];
+    protected $fillable = ['candidate_id', 'path', 'name', 'type', 'document_type'];
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()

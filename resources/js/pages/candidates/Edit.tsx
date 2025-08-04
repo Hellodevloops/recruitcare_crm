@@ -27,6 +27,9 @@ interface Candidate {
     email: string;
     phone?: string;
     company_name?: string;
+    current_designation?: string;
+    experience?: string;
+    notice_period?: string;
     designations?: Array<{
         title: string;
         company?: string;
@@ -64,6 +67,9 @@ export default function EditCandidate({ candidate }: Props) {
         email: candidate.email,
         phone: candidate.phone || '',
         company_name: candidate.company_name || '',
+        current_designation: candidate.current_designation || '',
+        experience: candidate.experience || '',
+        notice_period: candidate.notice_period || '',
         designations: candidate.designations || [] as Array<{
             title: string;
             company: string;
@@ -318,6 +324,39 @@ export default function EditCandidate({ candidate }: Props) {
                                             placeholder="Enter company name"
                                         />
                                         {errors.company_name && <p className="text-sm text-red-500">{errors.company_name}</p>}
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label htmlFor="current_designation">Current Designation</Label>
+                                        <Input
+                                            id="current_designation"
+                                            value={data.current_designation}
+                                            onChange={(e) => setData('current_designation', e.target.value)}
+                                            placeholder="e.g., Senior Fashion Stylist"
+                                        />
+                                        {errors.current_designation && <p className="text-sm text-red-500">{errors.current_designation}</p>}
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label htmlFor="experience">Experience</Label>
+                                        <Input
+                                            id="experience"
+                                            value={data.experience}
+                                            onChange={(e) => setData('experience', e.target.value)}
+                                            placeholder="e.g., 10+ Years"
+                                        />
+                                        {errors.experience && <p className="text-sm text-red-500">{errors.experience}</p>}
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label htmlFor="notice_period">Notice Period</Label>
+                                        <Input
+                                            id="notice_period"
+                                            value={data.notice_period}
+                                            onChange={(e) => setData('notice_period', e.target.value)}
+                                            placeholder="e.g., 1 Month"
+                                        />
+                                        {errors.notice_period && <p className="text-sm text-red-500">{errors.notice_period}</p>}
                                     </div>
 
                                     <div className="space-y-2">

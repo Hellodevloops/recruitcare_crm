@@ -26,15 +26,17 @@ class DocumentController extends Controller
             'file' => 'required|file|max:10240', // Max 10MB
             'name' => 'nullable|string|max:255',
             'type' => 'nullable|in:general,personal',
+            'document_type' => 'nullable|string|max:255',
         ]);
 
         $file = $request->file('file');
         $path = $file->store('documents', 'public');
         $document = Document::create([
             'candidate_id' => $validated['candidate_id'],
-            'file_path' => $path,
+            'path' => $path,
             'name' => $validated['name'] ?? $file->getClientOriginalName(),
             'type' => $validated['type'] ?? 'general',
+            'document_type' => $validated['document_type'] ?? null,
         ]);
 
         return response()->json($document, 201);
@@ -57,13 +59,14 @@ class DocumentController extends Controller
             'file' => 'nullable|file|max:10240', // Max 10MB
             'name' => 'nullable|string|max:255',
             'type' => 'nullable|in:general,personal',
+            'document_type' => 'nullable|string|max:255',
         ]);
 
         if ($request->hasFile('file')) {
-            Storage::disk('public')->delete($document->file_path);
+            Storage::disk('public')->delete($document->path);
             $file = $request->file('file');
             $path = $file->store('documents', 'public');
-            $document->file_path = $path;
+            $document->path = $path;
         }
 
         if ($validated['name'] ?? false) {
@@ -76,6 +79,10 @@ class DocumentController extends Controller
             $document->type = $validated['type'];
         }
 
+        if ($validated['document_type'] ?? false) {
+            $document->document_type = $validated['document_type'];
+        }
+
         $document->save();
 
         return response()->json($document);
@@ -86,7 +93,7 @@ class DocumentController extends Controller
      */
     public function destroy(Document $document)
     {
-        Storage::disk('public')->delete($document->file_path);
+        Storage::disk('public')->delete($document->path);
         $document->delete();
         return response()->json(null, 204);
     }

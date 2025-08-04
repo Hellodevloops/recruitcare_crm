@@ -25,7 +25,8 @@ class SendCandidateInfoToHr extends Mailable
      */
     public function __construct(Candidate $candidate, Position $position, $hrEmail)
     {
-        $this->candidate = $candidate;
+        // Load the documents relationship
+        $this->candidate = $candidate->load('documents');
         $this->position = $position;
         $this->hrEmail = $hrEmail;
     }
@@ -72,12 +73,18 @@ class SendCandidateInfoToHr extends Mailable
         }
 
         // Add documents if exist
-        if ($this->candidate->documents && is_array($this->candidate->documents)) {
+        if ($this->candidate->documents && $this->candidate->documents->count() > 0) {
             foreach ($this->candidate->documents as $document) {
-                if (isset($document['path']) && file_exists(storage_path('app/public/' . $document['path']))) {
-                    $attachments[] = Attachment::fromStorageDisk('public', $document['path'])
-                        ->as($document['name'] ?? 'Document_' . $this->candidate->name . '.pdf')
-                        ->withMime($document['type'] ?? 'application/pdf');
+                if ($document->path && file_exists(storage_path('app/public/' . $document->path))) {
+                    $documentName = $document->name ?? 'Document_' . $this->candidate->name;
+                    $documentType = $document->document_type ?? 'document';
+                    
+                    // Add document type to filename for better identification
+                    $filename = $documentType . '_' . $documentName . '.pdf';
+                    
+                    $attachments[] = Attachment::fromStorageDisk('public', $document->path)
+                        ->as($filename)
+                        ->withMime('application/pdf');
                 }
             }
         }

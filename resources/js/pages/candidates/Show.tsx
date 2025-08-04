@@ -180,6 +180,14 @@ const Show: React.FC = () => {
                             >
                                 {candidate.company_name || 'No company'}
                             </p>
+                            {candidate.current_designation && (
+                                <p
+                                    className="text-sm text-muted-foreground truncate"
+                                    title={candidate.current_designation}
+                                >
+                                    {candidate.current_designation}
+                                </p>
+                            )}
                         </div>
                     </div>
                     <div className="flex flex-wrap items-center gap-2">
@@ -291,6 +299,36 @@ const Show: React.FC = () => {
                                                     value={candidate.company_name || ''}
                                                     onChange={(e) => handleCandidateChange('company_name', e.target.value)}
                                                     disabled={isLoading}
+                                                />
+                                            </div>
+                                            <div>
+                                                <Label htmlFor="current_designation">Current Designation</Label>
+                                                <Input
+                                                    id="current_designation"
+                                                    value={candidate.current_designation || ''}
+                                                    onChange={(e) => handleCandidateChange('current_designation', e.target.value)}
+                                                    disabled={isLoading}
+                                                    placeholder="e.g., Senior Fashion Stylist"
+                                                />
+                                            </div>
+                                            <div>
+                                                <Label htmlFor="experience">Experience</Label>
+                                                <Input
+                                                    id="experience"
+                                                    value={candidate.experience || ''}
+                                                    onChange={(e) => handleCandidateChange('experience', e.target.value)}
+                                                    disabled={isLoading}
+                                                    placeholder="e.g., 10+ Years"
+                                                />
+                                            </div>
+                                            <div>
+                                                <Label htmlFor="notice_period">Notice Period</Label>
+                                                <Input
+                                                    id="notice_period"
+                                                    value={candidate.notice_period || ''}
+                                                    onChange={(e) => handleCandidateChange('notice_period', e.target.value)}
+                                                    disabled={isLoading}
+                                                    placeholder="e.g., 1 Month"
                                                 />
                                             </div>
                                             <div>
@@ -503,6 +541,33 @@ const Show: React.FC = () => {
                                                         <div>
                                                             <p className="text-sm text-muted-foreground">Company</p>
                                                             <p className="text-sm">{candidate.company_name}</p>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                                {candidate.current_designation && (
+                                                    <div className="flex items-center gap-3">
+                                                        <span className="h-4 w-4">💼</span>
+                                                        <div>
+                                                            <p className="text-sm text-muted-foreground">Current Designation</p>
+                                                            <p className="text-sm">{candidate.current_designation}</p>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                                {candidate.experience && (
+                                                    <div className="flex items-center gap-3">
+                                                        <span className="h-4 w-4">⏰</span>
+                                                        <div>
+                                                            <p className="text-sm text-muted-foreground">Experience</p>
+                                                            <p className="text-sm">{candidate.experience}</p>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                                {candidate.notice_period && (
+                                                    <div className="flex items-center gap-3">
+                                                        <span className="h-4 w-4">📅</span>
+                                                        <div>
+                                                            <p className="text-sm text-muted-foreground">Notice Period</p>
+                                                            <p className="text-sm">{candidate.notice_period}</p>
                                                         </div>
                                                     </div>
                                                 )}

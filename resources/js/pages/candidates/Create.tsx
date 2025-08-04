@@ -11,6 +11,24 @@ import { Plus, Trash2, Phone, ArrowLeft, User, Mail, Building, Calendar, AlertTr
 import axios from 'axios';
 import { Badge } from '@/components/ui/badge';
 
+interface ExistingCandidate {
+    id: number;
+    name: string;
+    email: string;
+    phone: string;
+    company_name?: string;
+    current_designation?: string;
+    experience?: string;
+    notice_period?: string;
+    status: string;
+    owner?: {
+        id: number;
+        name: string;
+    };
+    created_at: string;
+    updated_at: string;
+}
+
 export default function CreateCandidate() {
     const [step, setStep] = useState<'phone' | 'form' | 'existing'>('phone');
     const [phoneData, setPhoneData] = useState({
@@ -19,13 +37,16 @@ export default function CreateCandidate() {
     });
     const [phoneError, setPhoneError] = useState('');
     const [isChecking, setIsChecking] = useState(false);
-    const [existingCandidate, setExistingCandidate] = useState(null);
+    const [existingCandidate, setExistingCandidate] = useState<ExistingCandidate | null>(null);
 
     const { data, setData, post, processing, errors } = useForm({
         name: '',
         email: '',
         phone: '',
         company_name: '',
+        current_designation: '',
+        experience: '',
+        notice_period: '',
         designations: [] as Array<{
             title: string;
             company: string;
@@ -110,7 +131,7 @@ export default function CreateCandidate() {
     };
 
     const viewExistingCandidate = () => {
-        if (existingCandidate) {
+        if (existingCandidate !== null) {
             window.location.href = `/candidates/${existingCandidate.id}`;
         }
     };
@@ -132,7 +153,7 @@ export default function CreateCandidate() {
                             <CardHeader>
                                 <CardTitle className="flex items-center gap-2">
                                     <Phone className="h-5 w-5" />
-                                    Check Phone Number
+                                    Create New Candidate
                                 </CardTitle>
                                 <CardDescription>
                                     Enter the candidate's phone number to check if they already exist in the system.
@@ -197,7 +218,7 @@ export default function CreateCandidate() {
     }
 
     // Existing candidate found step
-    if (step === 'existing' && existingCandidate) {
+    if (step === 'existing' && existingCandidate !== null) {
         return (
             <AppLayout>
                 <div className="container mx-auto py-6">
@@ -236,6 +257,27 @@ export default function CreateCandidate() {
                                                 <div className="flex items-center gap-2">
                                                     <Building className="h-4 w-4 text-gray-500" />
                                                     <span>{existingCandidate.company_name}</span>
+                                                </div>
+                                            )}
+                                            
+                                            {existingCandidate.current_designation && (
+                                                <div className="flex items-center gap-2">
+                                                    <User className="h-4 w-4 text-gray-500" />
+                                                    <span>{existingCandidate.current_designation}</span>
+                                                </div>
+                                            )}
+                                            
+                                            {existingCandidate.experience && (
+                                                <div className="flex items-center gap-2">
+                                                    <Calendar className="h-4 w-4 text-gray-500" />
+                                                    <span>Experience: {existingCandidate.experience}</span>
+                                                </div>
+                                            )}
+                                            
+                                            {existingCandidate.notice_period && (
+                                                <div className="flex items-center gap-2">
+                                                    <AlertTriangle className="h-4 w-4 text-gray-500" />
+                                                    <span>Notice: {existingCandidate.notice_period}</span>
                                                 </div>
                                             )}
                                             
@@ -356,6 +398,39 @@ export default function CreateCandidate() {
                                             placeholder="Enter company name"
                                         />
                                         {errors.company_name && <p className="text-sm text-red-500">{errors.company_name}</p>}
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label htmlFor="current_designation">Current Designation</Label>
+                                        <Input
+                                            id="current_designation"
+                                            value={data.current_designation}
+                                            onChange={(e) => setData('current_designation', e.target.value)}
+                                            placeholder="e.g., Senior Fashion Stylist"
+                                        />
+                                        {errors.current_designation && <p className="text-sm text-red-500">{errors.current_designation}</p>}
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label htmlFor="experience">Experience</Label>
+                                        <Input
+                                            id="experience"
+                                            value={data.experience}
+                                            onChange={(e) => setData('experience', e.target.value)}
+                                            placeholder="e.g., 10+ Years"
+                                        />
+                                        {errors.experience && <p className="text-sm text-red-500">{errors.experience}</p>}
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label htmlFor="notice_period">Notice Period</Label>
+                                        <Input
+                                            id="notice_period"
+                                            value={data.notice_period}
+                                            onChange={(e) => setData('notice_period', e.target.value)}
+                                            placeholder="e.g., 1 Month"
+                                        />
+                                        {errors.notice_period && <p className="text-sm text-red-500">{errors.notice_period}</p>}
                                     </div>
 
                                     <div className="space-y-2">

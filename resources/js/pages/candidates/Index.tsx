@@ -25,6 +25,9 @@ interface Candidate {
     state?: string;
     country?: string;
     company_name?: string;
+    current_designation?: string;
+    experience?: string;
+    notice_period?: string;
     owner: { id: number; name: string };
     deal?: { id: number; name: string };
 }
@@ -362,8 +365,8 @@ export default function CandidateList() {
                                 <TableHeader className="bg-gray-50">
                                     <TableRow>
                                         <TableHead className="font-medium">Name</TableHead>
-                                        <TableHead className="font-medium">Candidate Info</TableHead>
-                                        <TableHead className="font-medium">Company</TableHead>
+                                        <TableHead className="font-medium">Contact Info</TableHead>
+                                        <TableHead className="font-medium">Professional Info</TableHead>
                                         <TableHead className="font-medium">Location</TableHead>
                                         <TableHead className="font-medium">Owner</TableHead>
                                         <TableHead className="text-right font-medium">Actions</TableHead>
@@ -401,14 +404,30 @@ export default function CandidateList() {
                                                     </div>
                                                 </TableCell>
                                                 <TableCell>
-                                                    {candidate.company_name ? (
+                                                    <div className="space-y-1">
+                                                        {candidate.company_name && (
                                                         <div className="flex items-center gap-1.5 text-sm">
                                                             <Building className="h-3.5 w-3.5 text-gray-500" />
-                                                            <span>{truncateText(candidate.company_name, 30)}</span>
+                                                                <span className="truncate max-w-[150px]">{truncateText(candidate.company_name, 25)}</span>
+                                                            </div>
+                                                        )}
+                                                        {candidate.current_designation && (
+                                                            <div className="flex items-center gap-1.5 text-sm">
+                                                                <User className="h-3.5 w-3.5 text-gray-500" />
+                                                                <span className="truncate max-w-[150px]">{truncateText(candidate.current_designation, 25)}</span>
+                                                            </div>
+                                                        )}
+                                                        {candidate.experience && (
+                                                            <div className="text-xs text-gray-600">
+                                                                Exp: {truncateText(candidate.experience, 15)}
+                                                            </div>
+                                                        )}
+                                                        {candidate.notice_period && (
+                                                            <div className="text-xs text-gray-600">
+                                                                Notice: {truncateText(candidate.notice_period, 15)}
                                                         </div>
-                                                    ) : (
-                                                        <span className="text-gray-400 text-sm">-</span>
                                                     )}
+                                                    </div>
                                                 </TableCell>
                                                 <TableCell>
                                                     {location ? (

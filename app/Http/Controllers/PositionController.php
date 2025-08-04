@@ -91,8 +91,8 @@ class PositionController extends Controller
             $query = \App\Models\Deal::where('brand_id', $position->brand_id)
                 ->whereNotNull('candidate_id')
                 ->with(['candidate' => function($query) {
-                    $query->select('id', 'name', 'email', 'phone', 'company_name', 'status');
-                }]);
+                    $query->select('id', 'name', 'email', 'phone', 'company_name', 'current_designation', 'experience', 'notice_period', 'status', 'current_ctc', 'expected_ctc', 'resume', 'created_at');
+                }, 'candidate.documents']);
             
             // If hr_id is also available, filter by both
             if ($position->hr_id) {
@@ -104,6 +104,15 @@ class PositionController extends Controller
                 ->filter() // Remove null candidates
                 ->unique('id')
                 ->values()
+                ->map(function($candidate) {
+                    // Ensure documents are properly loaded
+                    if ($candidate->documents) {
+                        $candidate->documents = $candidate->documents->filter(function($doc) {
+                            return $doc->type === 'personal';
+                        });
+                    }
+                    return $candidate;
+                })
                 ->toArray();
         }
         
@@ -157,7 +166,7 @@ class PositionController extends Controller
         ]);
 
         try {
-            $candidate = Candidate::findOrFail($request->candidate_id);
+            $candidate = Candidate::with('documents')->findOrFail($request->candidate_id);
             
             // Send email to HR
             Mail::to($request->hr_email)->send(new SendCandidateInfoToHr($candidate, $position, $request->hr_email));

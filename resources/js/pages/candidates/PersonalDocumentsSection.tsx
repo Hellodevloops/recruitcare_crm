@@ -63,19 +63,20 @@ const PersonalDocumentsSection: React.FC<PersonalDocumentsSectionProps> = ({ can
             formData.append('candidate_id', candidate.id.toString());
             formData.append('name', selectedDocument.name);
             formData.append('type', 'personal');
+            formData.append('document_type', selectedDocumentType);
 
             const response = await axios.post('/documents', formData, {
                 headers: { 'Content-Type': 'multipart/form-data' },
             });
             
             // Add new document to state
-            const updatedDocuments = [...personalDocuments, response.data];
-            setPersonalDocuments(updatedDocuments);
+            const newDocument = response.data;
+            setPersonalDocuments(prev => [...prev, newDocument]);
             
             // Update parent component
             setCandidate(prevCandidate => ({
                 ...prevCandidate,
-                documents: [...(prevCandidate.documents || []).filter(doc => doc.type !== 'personal'), ...updatedDocuments]
+                documents: [...(prevCandidate.documents || []), newDocument]
             }));
             
             // Reset the form
@@ -87,13 +88,13 @@ const PersonalDocumentsSection: React.FC<PersonalDocumentsSectionProps> = ({ can
             
             toast({
                 title: "Success",
-                description: "Personal document saved successfully"
+                description: "Personal document uploaded successfully"
             });
         } catch (error) {
-            console.error('Error saving personal document:', error);
+            console.error('Error uploading personal document:', error);
             toast({
                 title: "Error",
-                description: "Failed to save personal document"
+                description: "Failed to upload personal document"
             });
         } finally {
             setIsSaving(false);
@@ -112,7 +113,7 @@ const PersonalDocumentsSection: React.FC<PersonalDocumentsSectionProps> = ({ can
             // Update parent component
             setCandidate(prevCandidate => ({
                 ...prevCandidate,
-                documents: [...(prevCandidate.documents || []).filter(doc => doc.id !== documentId)]
+                documents: (prevCandidate.documents || []).filter(doc => doc.id !== documentId)
             }));
             
             toast({
@@ -130,18 +131,22 @@ const PersonalDocumentsSection: React.FC<PersonalDocumentsSectionProps> = ({ can
         }
     };
 
-    const getDocumentTypeLabel = (documentName: string) => {
-        const docType = PERSONAL_DOCUMENT_TYPES.find(type => 
-            documentName.toLowerCase().includes(type.value.replace('_', ' '))
-        );
+    const getDocumentTypeLabel = (documentType: string) => {
+        const docType = PERSONAL_DOCUMENT_TYPES.find(type => type.value === documentType);
         return docType ? docType.label : 'Other Documents';
     };
 
-    const getDocumentIcon = (documentName: string) => {
-        const docType = PERSONAL_DOCUMENT_TYPES.find(type => 
-            documentName.toLowerCase().includes(type.value.replace('_', ' '))
-        );
+    const getDocumentIcon = (documentType: string) => {
+        const docType = PERSONAL_DOCUMENT_TYPES.find(type => type.value === documentType);
         return docType ? docType.icon : FileText;
+    };
+
+    const formatFileSize = (bytes: number) => {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
     };
 
     return (
@@ -188,23 +193,23 @@ const PersonalDocumentsSection: React.FC<PersonalDocumentsSectionProps> = ({ can
                     {/* Other Personal Documents */}
                     {personalDocuments.length > 0 && (
                         <div className="space-y-2">
-                            <h4 className="font-medium text-gray-900">Other Personal Documents</h4>
+                            <h4 className="font-medium text-gray-900">Personal Documents</h4>
                             {personalDocuments.map((doc) => {
-                                const IconComponent = getDocumentIcon(doc.name);
+                                const IconComponent = getDocumentIcon(doc.document_type || '');
                                 return (
                                     <div key={doc.id} className="flex justify-between items-center p-3 border rounded-lg hover:bg-gray-50 transition">
                                         <div className="flex items-center space-x-3">
                                             <IconComponent className="h-5 w-5 text-blue-600" />
                                             <div>
                                                 <a 
-                                                    href={`/storage/${doc.file_path}`} 
+                                                    href={`/storage/${doc.path}`} 
                                                     target="_blank" 
                                                     className="text-sm font-medium text-blue-600 hover:underline"
                                                 >
                                                     {doc.name}
                                                 </a>
                                                 <p className="text-xs text-gray-500">
-                                                    {getDocumentTypeLabel(doc.name)}
+                                                    {getDocumentTypeLabel(doc.document_type || '')}
                                                 </p>
                                             </div>
                                         </div>
@@ -235,6 +240,7 @@ const PersonalDocumentsSection: React.FC<PersonalDocumentsSectionProps> = ({ can
                             onChange={handleFileSelection}
                             className="bg-white hidden"
                             disabled={isLoading || isSaving}
+                            accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png"
                         />
                         
                         <div className="flex gap-2">
@@ -254,7 +260,7 @@ const PersonalDocumentsSection: React.FC<PersonalDocumentsSectionProps> = ({ can
                                 <div className="flex justify-between items-center">
                                     <span className="truncate font-medium">{selectedDocument.name}</span>
                                     <span className="text-gray-500 text-xs">
-                                        {(selectedDocument.size / 1024 / 1024).toFixed(2)} MB
+                                        {formatFileSize(selectedDocument.size)}
                                     </span>
                                 </div>
                             </div>
@@ -293,7 +299,7 @@ const PersonalDocumentsSection: React.FC<PersonalDocumentsSectionProps> = ({ can
                             variant="default"
                         >
                             <Save className="mr-2 h-4 w-4" />
-                            {isSaving ? 'Saving...' : 'Save Personal Document'}
+                            {isSaving ? 'Uploading...' : 'Upload Personal Document'}
                         </Button>
                     </div>
                 </div>

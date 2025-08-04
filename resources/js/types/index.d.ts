@@ -51,6 +51,9 @@ export interface Candidate {
     state?: string;
     country?: string;
     company_name?: string;
+    current_designation?: string;
+    experience?: string;
+    notice_period?: string;
     designations?: Array<{
         title: string;
         company?: string;
@@ -113,9 +116,10 @@ export interface Note {
 export interface Document {
     id: number;
     candidate_id: number;
-    file_path: string;
+    path: string;
     name: string;
     type: 'general' | 'personal';
+    document_type?: string;
     created_at: string;
     updated_at: string;
 }

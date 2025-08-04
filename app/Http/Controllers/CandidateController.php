@@ -33,7 +33,10 @@ class CandidateController extends Controller
         $query->where(function ($q) use ($search) {
             $q->where('name', 'like', "%{$search}%")
               ->orWhere('email', 'like', "%{$search}%")
-              ->orWhere('company_name', 'like', "%{$search}%");
+              ->orWhere('company_name', 'like', "%{$search}%")
+              ->orWhere('current_designation', 'like', "%{$search}%")
+              ->orWhere('experience', 'like', "%{$search}%")
+              ->orWhere('notice_period', 'like', "%{$search}%");
         });
     }
 
@@ -193,7 +196,7 @@ public function logs(Candidate $candidate)
     public function getCandidatesData()
     {
         $candidates = Candidate::where('owner_id', auth()->id())
-            ->select('id', 'name', 'email', 'phone', 'company_name')
+            ->select('id', 'name', 'email', 'phone', 'company_name', 'current_designation', 'experience', 'notice_period')
             ->orderBy('name')
             ->get();
         
@@ -221,6 +224,9 @@ public function logs(Candidate $candidate)
             'email' => 'required|email|unique:candidates,email',
             'phone' => 'required|string|max:20|unique:candidates,phone',
             'company_name' => 'nullable|string|max:255',
+            'current_designation' => 'nullable|string|max:255',
+            'experience' => 'nullable|string|max:255',
+            'notice_period' => 'nullable|string|max:255',
             'designations' => 'nullable|array',
             'designations.*.title' => 'required|string|max:255',
             'designations.*.company' => 'nullable|string|max:255',
@@ -233,6 +239,7 @@ public function logs(Candidate $candidate)
             'expected_ctc' => 'nullable|numeric|min:0|max:99999999.99',
             'resume' => 'nullable|file|mimes:pdf|max:2048',
             'documents.*' => 'nullable|file|mimes:pdf,doc,docx,txt,jpg,jpeg,png|max:2048',
+            'document_types.*' => 'nullable|string|max:255',
         ]);
 
         // Handle resume upload
@@ -243,13 +250,16 @@ public function logs(Candidate $candidate)
         // Handle documents upload
         $documents = [];
         if ($request->hasFile('documents')) {
-            foreach ($request->file('documents') as $document) {
+            $documentTypes = $request->input('document_types', []);
+            foreach ($request->file('documents') as $index => $document) {
                 $path = $document->store('documents', 'public');
+                $documentType = isset($documentTypes[$index]) ? $documentTypes[$index] : 'other_documents';
                 $documents[] = [
                     'name' => $document->getClientOriginalName(),
                     'path' => $path,
                     'size' => $document->getSize(),
                     'type' => $document->getMimeType(),
+                    'document_type' => $documentType,
                 ];
             }
         }
@@ -283,6 +293,9 @@ public function logs(Candidate $candidate)
             'email' => 'required|email|unique:candidates,email,' . $candidate->id,
             'phone' => 'required|string|max:20|unique:candidates,phone,' . $candidate->id,
             'company_name' => 'nullable|string|max:255',
+            'current_designation' => 'nullable|string|max:255',
+            'experience' => 'nullable|string|max:255',
+            'notice_period' => 'nullable|string|max:255',
             'designations' => 'nullable|array',
             'designations.*.title' => 'required|string|max:255',
             'designations.*.company' => 'nullable|string|max:255',
@@ -295,6 +308,7 @@ public function logs(Candidate $candidate)
             'expected_ctc' => 'nullable|numeric|min:0|max:99999999.99',
             'resume' => 'nullable|file|mimes:pdf|max:2048',
             'documents.*' => 'nullable|file|mimes:pdf,doc,docx,txt,jpg,jpeg,png|max:2048',
+            'document_types.*' => 'nullable|string|max:255',
         ]);
 
         // Handle resume upload
@@ -309,13 +323,16 @@ public function logs(Candidate $candidate)
         // Handle documents upload
         $documents = $candidate->documents ?? [];
         if ($request->hasFile('documents')) {
-            foreach ($request->file('documents') as $document) {
+            $documentTypes = $request->input('document_types', []);
+            foreach ($request->file('documents') as $index => $document) {
                 $path = $document->store('documents', 'public');
+                $documentType = isset($documentTypes[$index]) ? $documentTypes[$index] : 'other_documents';
                 $documents[] = [
                     'name' => $document->getClientOriginalName(),
                     'path' => $path,
                     'size' => $document->getSize(),
                     'type' => $document->getMimeType(),
+                    'document_type' => $documentType,
                 ];
             }
         }
@@ -383,6 +400,9 @@ public function logs(Candidate $candidate)
                     'email' => $candidate->email,
                     'phone' => $candidate->phone,
                     'company_name' => $candidate->company_name,
+                    'current_designation' => $candidate->current_designation,
+                    'experience' => $candidate->experience,
+                    'notice_period' => $candidate->notice_period,
                     'status' => $candidate->status,
                     'owner' => $candidate->owner ? [
                         'id' => $candidate->owner->id,

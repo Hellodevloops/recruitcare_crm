@@ -7,123 +7,146 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            line-height: 1.6;
+            line-height: 1.4;
             color: #333;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+            background-color: white;
         }
         .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0;
             background-color: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
         .header {
             text-align: center;
-            border-bottom: 3px solid #007bff;
-            padding-bottom: 20px;
-            margin-bottom: 30px;
-        }
-        .header h1 {
-            color: #007bff;
-            margin: 0;
-            font-size: 28px;
+            background-color: #007bff;
+            color: white;
+            padding: 15px;
+            margin-bottom: 0;
         }
         .header p {
-            color: #666;
-            margin: 10px 0 0 0;
-            font-size: 16px;
+            margin: 0;
+            font-size: 14px;
+            font-weight: normal;
         }
-        .section {
-            margin-bottom: 30px;
+        .content {
             padding: 20px;
-            border: 1px solid #e9ecef;
-            border-radius: 8px;
-            background-color: #f8f9fa;
-        }
-        .section h2 {
-            color: #495057;
-            border-bottom: 2px solid #007bff;
-            padding-bottom: 10px;
-            margin-bottom: 20px;
-            font-size: 20px;
-        }
-        .info-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
-        .info-item {
-            margin-bottom: 15px;
-        }
-        .info-label {
-            font-weight: bold;
-            color: #495057;
-            margin-bottom: 5px;
-        }
-        .info-value {
-            color: #333;
-            padding: 8px 12px;
             background-color: white;
-            border-radius: 4px;
-            border: 1px solid #dee2e6;
         }
-        .status-badge {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 12px;
+        .candidate-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 0 0 20px 0;
+            background-color: white;
+            border: 1px solid #ddd;
+        }
+        .candidate-table th {
+            background-color: #f8f9fa;
+            color: #333;
             font-weight: bold;
-            text-transform: uppercase;
+            padding: 12px 8px;
+            text-align: left;
+            font-size: 12px;
+            border: 1px solid #ddd;
         }
-        .status-active {
-            background-color: #d4edda;
-            color: #155724;
+        .candidate-table td {
+            padding: 12px 8px;
+            border: 1px solid #ddd;
+            font-size: 12px;
+            vertical-align: top;
         }
-        .status-inactive {
-            background-color: #f8d7da;
-            color: #721c24;
+        .email-link {
+            color: #007bff;
+            text-decoration: underline;
         }
-        .attachments {
-            background-color: #e7f3ff;
-            border: 1px solid #b3d9ff;
-            border-radius: 6px;
-            padding: 15px;
+        .documents-section {
             margin-top: 20px;
+            padding: 0;
+            background-color: white;
         }
-        .attachments h3 {
-            color: #0056b3;
-            margin: 0 0 10px 0;
+        .documents-section h3 {
+            color: #333;
+            margin: 0 0 15px 0;
             font-size: 16px;
+            font-weight: bold;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 5px;
         }
-        .attachment-list {
+        .document-list {
             list-style: none;
             padding: 0;
             margin: 0;
         }
-        .attachment-list li {
-            padding: 8px 0;
-            border-bottom: 1px solid #b3d9ff;
+        .document-list li {
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
-        .attachment-list li:last-child {
+        .document-list li:last-child {
             border-bottom: none;
+        }
+        .document-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .document-icon {
+            font-size: 18px;
+            color: #666;
+        }
+        .document-details {
+            display: flex;
+            flex-direction: column;
+        }
+        .document-name {
+            font-weight: bold;
+            color: #333;
+            font-size: 13px;
+        }
+        .document-type {
+            font-size: 11px;
+            color: #666;
+            margin-top: 2px;
+        }
+        .document-status {
+            color: #28a745;
+            font-size: 12px;
+            font-weight: bold;
         }
         .footer {
             text-align: center;
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid #dee2e6;
-            color: #6c757d;
-            font-size: 14px;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #ddd;
+            color: #666;
+            font-size: 12px;
         }
-        @media (max-width: 600px) {
-            .info-grid {
-                grid-template-columns: 1fr;
-            }
+        .footer p {
+            margin: 3px 0;
+        }
+        .no-documents {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+            font-style: italic;
+        }
+        @media (max-width: 768px) {
             .container {
-                padding: 20px;
+                padding: 0;
+            }
+            .candidate-table {
+                font-size: 10px;
+            }
+            .candidate-table th,
+            .candidate-table td {
+                padding: 8px 4px;
+            }
+            .content {
+                padding: 15px;
             }
         }
     </style>
@@ -131,100 +154,121 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>Candidate Information</h1>
-            <p>Position: {{ $position->title }}</p>
             <p>Sent on: {{ now()->format('F j, Y \a\t g:i A') }}</p>
         </div>
 
-        <div class="section">
-            <h2>Personal Information</h2>
-            <div class="info-grid">
-                <div class="info-item">
-                    <div class="info-label">Full Name</div>
-                    <div class="info-value">{{ $candidate->name }}</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Email Address</div>
-                    <div class="info-value">{{ $candidate->email }}</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Phone Number</div>
-                    <div class="info-value">{{ $candidate->phone }}</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Company</div>
-                    <div class="info-value">{{ $candidate->company_name ?? 'N/A' }}</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Status</div>
-                    <div class="info-value">
-                        @if($candidate->status)
-                            <span class="status-badge status-{{ strtolower($candidate->status) }}">
-                                {{ $candidate->status }}
-                            </span>
-                        @else
-                            N/A
-                        @endif
-                    </div>
+        <div class="content">
+            <table class="candidate-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Contact No.</th>
+                        <th>Current Organisation</th>
+                        <th>Current Designation</th>
+                        <th>Experience</th>
+                        <th>Current CTC</th>
+                        <th>Expected CTC</th>
+                        <th>Location</th>
+                        <th>Notice Period</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>{{ $candidate->created_at ? \Carbon\Carbon::parse($candidate->created_at)->format('d/m/Y') : 'N/A' }}</td>
+                        <td>{{ $candidate->name }}</td>
+                        <td><a href="mailto:{{ $candidate->email }}" class="email-link">{{ $candidate->email }}</a></td>
+                        <td>{{ $candidate->phone }}</td>
+                        <td>{{ $candidate->company_name ?? 'N/A' }}</td>
+                        <td>{{ $candidate->current_designation ?? 'N/A' }}</td>
+                        <td>{{ $candidate->experience ?? 'N/A' }}</td>
+                        <td>{{ $candidate->current_ctc ? '₹' . number_format($candidate->current_ctc) : 'N/A' }}</td>
+                        <td>{{ $candidate->expected_ctc ? '₹' . number_format($candidate->expected_ctc) : 'N/A' }}</td>
+                        <td>{{ $position->city ?? 'N/A' }}</td>
+                        <td>{{ $candidate->notice_period ?? 'N/A' }}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            @if($candidate->resume || ($candidate->documents && $candidate->documents->count() > 0))
+            <div class="documents-section">
+                <h3>Documents & Attachments</h3>
+                <ul class="document-list">
+                    @if($candidate->resume)
+                        <li>
+                            <div class="document-info">
+                                <span class="document-icon">📄</span>
+                                <div class="document-details">
+                                    <span class="document-name">Resume</span>
+                                    <span class="document-type">Resume Document</span>
+                                </div>
+                            </div>
+                            <span class="document-status">Attached</span>
+                        </li>
+                    @endif
+                    @if($candidate->documents && $candidate->documents->count() > 0)
+                        @foreach($candidate->documents as $document)
+                            <li>
+                                <div class="document-info">
+                                    <span class="document-icon">
+                                        @switch($document->document_type ?? '')
+                                            @case('pan_card')
+                                                🆔
+                                                @break
+                                            @case('aadhar_card')
+                                                🆔
+                                                @break
+                                            @case('experience_certificate')
+                                                🏢
+                                                @break
+                                            @case('salary_slip')
+                                                💰
+                                                @break
+                                            @default
+                                                📄
+                                        @endswitch
+                                    </span>
+                                    <div class="document-details">
+                                        <span class="document-name">{{ $document->name ?? 'Document' }}</span>
+                                        <span class="document-type">
+                                            @switch($document->document_type ?? '')
+                                                @case('pan_card')
+                                                    PAN Card
+                                                    @break
+                                                @case('aadhar_card')
+                                                    Aadhar Card
+                                                    @break
+                                                @case('experience_certificate')
+                                                    Experience Certificate
+                                                    @break
+                                                @case('salary_slip')
+                                                    Salary Slip
+                                                    @break
+                                                @default
+                                                    Other Document
+                                            @endswitch
+                                        </span>
+                                    </div>
+                                </div>
+                                <span class="document-status">Attached</span>
+                            </li>
+                        @endforeach
+                    @endif
+                </ul>
+            </div>
+            @else
+            <div class="documents-section">
+                <h3>Documents & Attachments</h3>
+                <div class="no-documents">
+                    <p>No documents available for this candidate.</p>
                 </div>
             </div>
-        </div>
+            @endif
 
-        <div class="section">
-            <h2>Position Details</h2>
-            <div class="info-grid">
-                <div class="info-item">
-                    <div class="info-label">Position Title</div>
-                    <div class="info-value">{{ $position->title }}</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Designation</div>
-                    <div class="info-value">{{ $position->designation ?? 'N/A' }}</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Experience Required</div>
-                    <div class="info-value">{{ $position->experience ?? 'N/A' }}</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Budget</div>
-                    <div class="info-value">
-                        @if($position->budget)
-                            ₹{{ number_format($position->budget, 2) }}
-                        @else
-                            N/A
-                        @endif
-                    </div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Store</div>
-                    <div class="info-value">{{ $position->store ?? 'N/A' }}</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">City</div>
-                    <div class="info-value">{{ $position->city ?? 'N/A' }}</div>
-                </div>
+            <div class="footer">
+                <p>This email was automatically generated by the CRM system.</p>
             </div>
-        </div>
-
-        @if($candidate->resume || ($candidate->documents && count($candidate->documents) > 0))
-        <div class="attachments">
-            <h3>📎 Attachments</h3>
-            <ul class="attachment-list">
-                @if($candidate->resume)
-                    <li>📄 Resume - {{ basename($candidate->resume) }}</li>
-                @endif
-                @if($candidate->documents && is_array($candidate->documents))
-                    @foreach($candidate->documents as $document)
-                        <li>📄 {{ $document['name'] ?? 'Document' }} - {{ isset($document['size']) ? number_format($document['size'] / 1024, 2) . ' KB' : 'N/A' }}</li>
-                    @endforeach
-                @endif
-            </ul>
-        </div>
-        @endif
-
-        <div class="footer">
-            <p>This email was automatically generated by the CRM system.</p>
-            <p>For any questions, please contact the system administrator.</p>
         </div>
     </div>
 </body>
