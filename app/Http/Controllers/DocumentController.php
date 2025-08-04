@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Document;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
 
 class DocumentController extends Controller
 {
@@ -48,6 +49,54 @@ class DocumentController extends Controller
     public function show(Document $document)
     {
         return response()->json($document);
+    }
+
+    /**
+     * Download a document securely.
+     */
+    public function download(Document $document)
+    {
+        // Check if user is authenticated
+        if (!Auth::check()) {
+            abort(403, 'Unauthorized access');
+        }
+
+        // Check if file exists
+        if (!Storage::disk('public')->exists($document->path)) {
+            \Log::warning('Document file not found', [
+                'document_id' => $document->id,
+                'path' => $document->path,
+                'user_id' => Auth::id()
+            ]);
+            abort(404, 'File not found');
+        }
+
+        try {
+            // Get file path and mime type
+            $filePath = Storage::disk('public')->path($document->path);
+            $mimeType = Storage::disk('public')->mimeType($document->path);
+
+            // Log the download attempt
+            \Log::info('Document downloaded', [
+                'document_id' => $document->id,
+                'document_name' => $document->name,
+                'user_id' => Auth::id(),
+                'user_email' => Auth::user()->email
+            ]);
+
+            // Return file as download
+            return response()->download($filePath, $document->name, [
+                'Content-Type' => $mimeType,
+                'Content-Disposition' => 'inline; filename="' . $document->name . '"'
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Error downloading document', [
+                'document_id' => $document->id,
+                'error' => $e->getMessage(),
+                'user_id' => Auth::id()
+            ]);
+            abort(500, 'Error downloading file');
+        }
     }
 
     /**

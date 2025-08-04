@@ -526,7 +526,7 @@ const Show: React.FC = () => {
                                                         <div className="w-full">
                                                             <p className="text-sm text-muted-foreground">Resume</p>
                                                             <a 
-                                                                href={`/storage/${candidate.resume}`} 
+                                                                href={`/candidates/${candidate.id}/resume/download`} 
                                                                 target="_blank" 
                                                                 className="text-sm text-blue-600 hover:underline"
                                                             >

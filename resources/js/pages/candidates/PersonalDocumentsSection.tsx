@@ -167,7 +167,7 @@ const PersonalDocumentsSection: React.FC<PersonalDocumentsSectionProps> = ({ can
                                     <FileText className="h-5 w-5 text-blue-600" />
                                     <div>
                                         <a 
-                                            href={`/storage/${candidate.resume}`} 
+                                            href={`/candidates/${candidate.id}/resume/download`} 
                                             target="_blank" 
                                             className="text-sm font-medium text-blue-600 hover:underline"
                                         >
@@ -181,7 +181,7 @@ const PersonalDocumentsSection: React.FC<PersonalDocumentsSectionProps> = ({ can
                                 <Button
                                     variant="outline"
                                     size="sm"
-                                    onClick={() => window.open(`/storage/${candidate.resume}`, '_blank')}
+                                    onClick={() => window.open(`/candidates/${candidate.id}/resume/download`, '_blank')}
                                 >
                                     <Download className="h-4 w-4 mr-1" />
                                     View
@@ -202,7 +202,7 @@ const PersonalDocumentsSection: React.FC<PersonalDocumentsSectionProps> = ({ can
                                             <IconComponent className="h-5 w-5 text-blue-600" />
                                             <div>
                                                 <a 
-                                                    href={`/storage/${doc.path}`} 
+                                                    href={`/documents/${doc.id}/download`} 
                                                     target="_blank" 
                                                     className="text-sm font-medium text-blue-600 hover:underline"
                                                 >

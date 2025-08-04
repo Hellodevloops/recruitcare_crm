@@ -77,6 +77,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/candidates/{candidate}/logs', [CandidateController::class, 'logs'])->name('candidates.logs');
     Route::get('/candidates-data', [CandidateController::class, 'getCandidatesData'])->name('candidates.data');
     Route::post('/api/check-phone', [CandidateController::class, 'checkPhone'])->name('candidates.checkPhone');
+    Route::get('/candidates/{candidate}/resume/download', [CandidateController::class, 'downloadResume'])->name('candidates.resume.download');
 
 
     Route::prefix('followups')->group(function () {
@@ -139,6 +140,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('activities', ActivityController::class)->only(['index', 'store', 'show', 'update', 'destroy']);
     Route::resource('notes', NoteController::class)->only(['index', 'store', 'show', 'update', 'destroy']);
     Route::resource('documents', DocumentController::class)->only(['index', 'store', 'show', 'update', 'destroy']);
+    Route::get('/documents/{document}/download', [DocumentController::class, 'download'])->name('documents.download');
 
     //report
 

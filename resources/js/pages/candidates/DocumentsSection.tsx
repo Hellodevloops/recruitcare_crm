@@ -158,7 +158,7 @@ const DocumentsSection: React.FC<DocumentsSectionProps> = ({ candidate, setCandi
                     {documents.length > 0 ? (
                         documents.map((doc) => (
                             <div key={doc.id} className="flex justify-between items-center p-2 border rounded hover:bg-gray-50 transition">
-                                <a href={`/storage/${doc.file_path}`} target="_blank" className="text-sm text-blue-600 hover:underline">{doc.name}</a>
+                                <a href={`/documents/${doc.id}/download`} target="_blank" className="text-sm text-blue-600 hover:underline">{doc.name}</a>
                                 <Button 
                                     variant="destructive" 
                                     size="icon" 

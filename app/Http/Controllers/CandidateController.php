@@ -420,4 +420,54 @@ public function logs(Candidate $candidate)
             'message' => 'Phone number is available for new candidate.'
         ]);
     }
+
+    /**
+     * Download a candidate's resume securely.
+     */
+    public function downloadResume(Candidate $candidate)
+    {
+        // Check if user is authenticated
+        if (!Auth::check()) {
+            abort(403, 'Unauthorized access');
+        }
+
+        // Check if resume exists
+        if (!$candidate->resume || !Storage::disk('public')->exists($candidate->resume)) {
+            \Log::warning('Resume file not found', [
+                'candidate_id' => $candidate->id,
+                'resume_path' => $candidate->resume,
+                'user_id' => Auth::id()
+            ]);
+            abort(404, 'Resume not found');
+        }
+
+        try {
+            // Get file path and mime type
+            $filePath = Storage::disk('public')->path($candidate->resume);
+            $mimeType = Storage::disk('public')->mimeType($candidate->resume);
+            $fileName = basename($candidate->resume);
+
+            // Log the download attempt
+            \Log::info('Resume downloaded', [
+                'candidate_id' => $candidate->id,
+                'candidate_name' => $candidate->name,
+                'resume_file' => $fileName,
+                'user_id' => Auth::id(),
+                'user_email' => Auth::user()->email
+            ]);
+
+            // Return file as download
+            return response()->download($filePath, $fileName, [
+                'Content-Type' => $mimeType,
+                'Content-Disposition' => 'inline; filename="' . $fileName . '"'
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Error downloading resume', [
+                'candidate_id' => $candidate->id,
+                'error' => $e->getMessage(),
+                'user_id' => Auth::id()
+            ]);
+            abort(500, 'Error downloading resume');
+        }
+    }
 }

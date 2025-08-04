@@ -333,7 +333,7 @@ export default function Show({ position, relatedCandidates }: Props) {
                                                             <Button
                                                                 variant="outline"
                                                                 size="sm"
-                                                                onClick={() => window.open(`/storage/${candidate.resume}`, '_blank')}
+                                                                onClick={() => window.open(`/candidates/${candidate.id}/resume/download`, '_blank')}
                                                             >
                                                                 <Download className="h-4 w-4 mr-1" />
                                                                 View
@@ -355,7 +355,7 @@ export default function Show({ position, relatedCandidates }: Props) {
                                                                 <Button
                                                                     variant="outline"
                                                                     size="sm"
-                                                                    onClick={() => window.open(`/storage/${doc.path}`, '_blank')}
+                                                                    onClick={() => window.open(`/documents/${doc.id}/download`, '_blank')}
                                                                 >
                                                                     <Download className="h-4 w-4 mr-1" />
                                                                     View
