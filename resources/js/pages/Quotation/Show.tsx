@@ -1,8 +1,8 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/Avatar';
-import { Badge } from '@/components/ui/Badge';
-import { Button } from '@/components/ui/Button';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/Tooltip';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { 
   Printer, 
   Download, 
@@ -20,7 +20,7 @@ import {
   DialogTitle, 
   DialogDescription, 
   DialogFooter 
-} from '@/components/ui/Dialog';
+} from '@/components/ui/dialog';
 import AppLayout from "@/layouts/app-layout";
 import { Head, usePage, router } from '@inertiajs/react';
 import { useState, useEffect } from 'react';

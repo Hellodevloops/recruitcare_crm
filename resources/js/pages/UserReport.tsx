@@ -8,7 +8,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { format } from 'date-fns';
 import { CalendarIcon, RefreshCw, Clock, ChevronDown, ChevronUp } from 'lucide-react';
-import AppLayout from '@inertiajs/react';
+import AppLayout from '@/layouts/app-layout';
 import { Head } from '@inertiajs/react';
 
 export default function UserReport({ users, reportData }) {
