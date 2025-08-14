@@ -80,16 +80,16 @@ const allNavItems: NavItem[] = [
         href: '/pipelines',
         icon: UserCog,
     },
-    {
-        title: 'Quotation',
-        href: '/quotations',
-        icon: ReceiptText,
-    },
-    {
-        title: 'Invoice',
-        href: '/invoices',
-        icon: IdCard,
-    },
+    // {
+    //     title: 'Quotation',
+    //     href: '/quotations',
+    //     icon: ReceiptText,
+    // },
+    // {
+    //     title: 'Invoice',
+    //     href: '/invoices',
+    //     icon: IdCard,
+    // },
     {
         title: 'Users Management',
         href: '/users',
