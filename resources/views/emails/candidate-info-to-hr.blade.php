@@ -19,18 +19,6 @@
             padding: 0;
             background-color: white;
         }
-        .header {
-            text-align: center;
-            background-color: #007bff;
-            color: white;
-            padding: 15px;
-            margin-bottom: 0;
-        }
-        .header p {
-            margin: 0;
-            font-size: 14px;
-            font-weight: normal;
-        }
         .content {
             padding: 20px;
             background-color: white;
@@ -134,22 +122,6 @@
             color: #666;
             font-style: italic;
         }
-        .candidate-section {
-            margin-bottom: 30px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            overflow: hidden;
-        }
-        .candidate-header {
-            background-color: #f8f9fa;
-            padding: 10px 15px;
-            border-bottom: 1px solid #ddd;
-            font-weight: bold;
-            color: #333;
-        }
-        .candidate-content {
-            padding: 15px;
-        }
         @media (max-width: 768px) {
             .container {
                 padding: 0;
@@ -169,56 +141,42 @@
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <p>Sent on: {{ now()->format('F j, Y \a\t g:i A') }}</p>
-        </div>
-
         <div class="content">
             @if($isMultiple)
-                <h2 style="margin-bottom: 20px; color: #333;">Multiple Candidates Information</h2>
-                @foreach($candidates as $candidate)
-                    <div class="candidate-section">
-                        <div class="candidate-header">
-                            Candidate: {{ $candidate->name }}
-                        </div>
-                        <div class="candidate-content">
-                            <table class="candidate-table">
-                                <thead>
-                                    <tr>
-                                        <th>Date</th>
-                                        <th>Name</th>
-                                        <th>Email</th>
-                                        <th>Contact No.</th>
-                                        <th>Current Organisation</th>
-                                        <th>Current Designation</th>
-                                        <th>Experience</th>
-                                        <th>Current CTC</th>
-                                        <th>Expected CTC</th>
-                                        <th>Location</th>
-                                        <th>Notice Period</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>{{ $candidate->created_at ? \Carbon\Carbon::parse($candidate->created_at)->format('d/m/Y') : 'N/A' }}</td>
-                                        <td>{{ $candidate->name }}</td>
-                                        <td><a href="mailto:{{ $candidate->email }}" class="email-link">{{ $candidate->email }}</a></td>
-                                        <td>{{ $candidate->phone }}</td>
-                                        <td>{{ $candidate->company_name ?? 'N/A' }}</td>
-                                        <td>{{ $candidate->current_designation ?? 'N/A' }}</td>
-                                        <td>{{ $candidate->experience ?? 'N/A' }}</td>
-                                        <td>{{ $candidate->current_ctc ? '₹' . number_format($candidate->current_ctc) : 'N/A' }}</td>
-                                        <td>{{ $candidate->expected_ctc ? '₹' . number_format($candidate->expected_ctc) : 'N/A' }}</td>
-                                        <td>{{ $position->city ?? 'N/A' }}</td>
-                                        <td>{{ $candidate->notice_period ?? 'N/A' }}</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-
-
-                        </div>
-                    </div>
-                @endforeach
+                <table class="candidate-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Contact No.</th>
+                            <th>Current Organisation</th>
+                            <th>Current Designation</th>
+                            <th>Experience</th>
+                            <th>Current CTC</th>
+                            <th>Expected CTC</th>
+                            <th>Location</th>
+                            <th>Notice Period</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($candidates as $candidate)
+                        <tr>
+                            <td>{{ $candidate->created_at ? \Carbon\Carbon::parse($candidate->created_at)->format('d/m/Y') : 'N/A' }}</td>
+                            <td>{{ $candidate->name }}</td>
+                            <td><a href="mailto:{{ $candidate->email }}" class="email-link">{{ $candidate->email }}</a></td>
+                            <td>{{ $candidate->phone }}</td>
+                            <td>{{ $candidate->company_name ?? 'N/A' }}</td>
+                            <td>{{ $candidate->current_designation ?? 'N/A' }}</td>
+                            <td>{{ $candidate->experience ?? 'N/A' }}</td>
+                            <td>{{ $candidate->current_ctc ? '₹' . number_format($candidate->current_ctc) : 'N/A' }}</td>
+                            <td>{{ $candidate->expected_ctc ? '₹' . number_format($candidate->expected_ctc) : 'N/A' }}</td>
+                            <td>{{ $position->city ?? 'N/A' }}</td>
+                            <td>{{ $candidate->notice_period ?? 'N/A' }}</td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
             @else
                 <table class="candidate-table">
                     <thead>
@@ -256,8 +214,6 @@
                 </table>
             @endif
 
-
-            
             <div class="footer">
                 <p>This email was automatically generated by the CRM system.</p>
             </div>
