@@ -29,9 +29,10 @@ interface HrRecord {
 interface Props {
     hrList: HrRecord[];
     brands: Brand[];
+    error?: string;
 }
 
-export default function HRIndex({ hrList, brands }: Props) {
+export default function HRIndex({ hrList, brands, error }: Props) {
     const [isOpen, setIsOpen] = useState(false);
     const { toast } = useToast();
     const form = useForm({
@@ -96,6 +97,11 @@ export default function HRIndex({ hrList, brands }: Props) {
             <Head title="HR Dashboard" />
             
             <div className="flex flex-col gap-4 p-4 md:p-6">
+                {error && (
+                    <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+                        <strong>Error:</strong> {error}
+                    </div>
+                )}
                 <Card>
                     <CardHeader>
                         <CardTitle>Create HR Record</CardTitle>
@@ -133,14 +139,20 @@ export default function HRIndex({ hrList, brands }: Props) {
                                                 </Button>
                                             </DropdownMenuTrigger>
                                             <DropdownMenuContent className="w-full max-h-[200px] overflow-y-auto">
-                                                {brands.map(brand => (
-                                                    <DropdownMenuItem 
-                                                        key={brand.id}
-                                                        onClick={() => handleBrandSelect(brand)}
-                                                    >
-                                                        {brand.name}
+                                                {brands.length > 0 ? (
+                                                    brands.map(brand => (
+                                                        <DropdownMenuItem 
+                                                            key={brand.id}
+                                                            onClick={() => handleBrandSelect(brand)}
+                                                        >
+                                                            {brand.name}
+                                                        </DropdownMenuItem>
+                                                    ))
+                                                ) : (
+                                                    <DropdownMenuItem disabled>
+                                                        No brands available
                                                     </DropdownMenuItem>
-                                                ))}
+                                                )}
                                             </DropdownMenuContent>
                                         </DropdownMenu>
                                         <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -218,17 +230,25 @@ export default function HRIndex({ hrList, brands }: Props) {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {hrList.map(hr => (
-                                        <tr key={hr.id} className="border-b">
-                                            <td className="p-2">{hr.name}</td>
-                                            <td className="p-2">{hr.email}</td>
-                                            <td className="p-2">{hr.brand.name}</td>
-                                            <td className="p-2">
-                                                {hr.brand.email && <div>{hr.brand.email}</div>}
-                                                {hr.brand.phone && <div>{hr.brand.phone}</div>}
+                                    {hrList.length > 0 ? (
+                                        hrList.map(hr => (
+                                            <tr key={hr.id} className="border-b">
+                                                <td className="p-2">{hr.name}</td>
+                                                <td className="p-2">{hr.email}</td>
+                                                <td className="p-2">{hr.brand?.name || 'N/A'}</td>
+                                                <td className="p-2">
+                                                    {hr.brand?.email && <div>{hr.brand.email}</div>}
+                                                    {hr.brand?.phone && <div>{hr.brand.phone}</div>}
+                                                </td>
+                                            </tr>
+                                        ))
+                                    ) : (
+                                        <tr>
+                                            <td colSpan={4} className="p-4 text-center text-gray-500">
+                                                No HR records found
                                             </td>
                                         </tr>
-                                    ))}
+                                    )}
                                 </tbody>
                             </table>
                         </div>

@@ -159,6 +159,44 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::put('/calendar/{activity}/drag', [CalendarController::class, 'dragUpdate']);
     Route::delete('/calendar/{activity}', [CalendarController::class, 'destroy']);
 
+    // Placeholder API for avatar images
+    Route::get('/api/placeholder/{size}/{id}', function ($size, $id) {
+        $size = (int) $size;
+        if ($size < 16 || $size > 512) {
+            $size = 32;
+        }
+        
+        // Generate a simple SVG placeholder
+        $svg = '<svg width="' . $size . '" height="' . $size . '" xmlns="http://www.w3.org/2000/svg">';
+        $svg .= '<rect width="' . $size . '" height="' . $size . '" fill="#e5e7eb"/>';
+        $svg .= '<text x="50%" y="50%" font-family="Arial, sans-serif" font-size="' . ($size * 0.4) . '" text-anchor="middle" dy=".3em" fill="#6b7280">' . ($id % 9 + 1) . '</text>';
+        $svg .= '</svg>';
+        
+        return response($svg, 200, ['Content-Type' => 'image/svg+xml']);
+    })->name('api.placeholder');
+
+    // Debug route for HR issues
+    Route::get('/debug/hr', function () {
+        try {
+            $user = auth()->user();
+            if (!$user) {
+                return response()->json(['error' => 'User not authenticated'], 401);
+            }
+            
+            $hrCount = \App\Models\Hr::where('user_id', $user->id)->count();
+            $brandCount = \App\Models\Brand::where('user_id', $user->id)->count();
+            
+            return response()->json([
+                'user_id' => $user->id,
+                'hr_count' => $hrCount,
+                'brand_count' => $brandCount,
+                'status' => 'success'
+            ]);
+        } catch (Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    })->middleware('auth');
+
     Route::get('/roles-permissions', [RolePermissionController::class, 'index'])
         ->name('roles-permissions.index');
     Route::post('/roles', [RolePermissionController::class, 'storeRole'])->name('roles.store');
