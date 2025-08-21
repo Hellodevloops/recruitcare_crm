@@ -39,9 +39,10 @@ interface Props {
   flash?: {
     success?: string;
   };
+  error?: string;
 }
 
-const BrandsPage: React.FC<Props> = ({ brands = [], flash }) => {
+const BrandsPage: React.FC<Props> = ({ brands = [], flash, error }) => {
   const { toast } = useToast();
 
   useEffect(() => {
@@ -61,6 +62,11 @@ const BrandsPage: React.FC<Props> = ({ brands = [], flash }) => {
     <AppLayout>
       <div className="container mx-auto py-6">
         <div className="max-w-7xl mx-auto">
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
+              <strong>Error:</strong> {error}
+            </div>
+          )}
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
               <div>

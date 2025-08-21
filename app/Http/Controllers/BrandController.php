@@ -5,22 +5,46 @@ namespace App\Http\Controllers;
 use App\Models\Brand;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Exception;
 
 class BrandController extends Controller
 {
     public function getBrandsData()
     {
-        $brands = Brand::where('user_id', auth()->id())->get();
-        return response()->json($brands);
+        try {
+            $userId = auth()->id();
+            if (!$userId) {
+                return response()->json(['error' => 'User not authenticated'], 401);
+            }
+
+            $brands = Brand::where('user_id', $userId)->get();
+            return response()->json($brands);
+        } catch (Exception $e) {
+            \Log::error('Brand Data Error: ' . $e->getMessage());
+            return response()->json(['error' => 'An error occurred while fetching brands data.'], 500);
+        }
     }
 
     public function index()
     {
-        $brands = Brand::where('user_id', auth()->id())->latest()->get();
-        
-        return Inertia::render('brands/Index', [
-            'brands' => $brands->toArray()
-        ]);
+        try {
+            $userId = auth()->id();
+            if (!$userId) {
+                return redirect()->route('login');
+            }
+
+            $brands = Brand::where('user_id', $userId)->latest()->get();
+            
+            return Inertia::render('brands/Index', [
+                'brands' => $brands->toArray()
+            ]);
+        } catch (Exception $e) {
+            \Log::error('Brand Index Error: ' . $e->getMessage());
+            return Inertia::render('brands/Index', [
+                'brands' => [],
+                'error' => 'An error occurred while loading brands data: ' . $e->getMessage()
+            ]);
+        }
     }
 
     public function create()
@@ -30,19 +54,24 @@ class BrandController extends Controller
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'nullable|email|max:255',
-            'phone' => 'nullable|string|max:20',
-            'address' => 'nullable|string|max:1000',
-        ]);
+        try {
+            $validated = $request->validate([
+                'name' => 'required|string|max:255',
+                'email' => 'nullable|email|max:255',
+                'phone' => 'nullable|string|max:20',
+                'address' => 'nullable|string|max:1000',
+            ]);
 
-        $validated['user_id'] = auth()->id();
+            $validated['user_id'] = auth()->id();
 
-        Brand::create($validated);
+            Brand::create($validated);
 
-        return redirect()->route('brands.index')
-            ->with('success', 'Brand created successfully.');
+            return redirect()->route('brands.index')
+                ->with('success', 'Brand created successfully.');
+        } catch (Exception $e) {
+            \Log::error('Brand Store Error: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'An error occurred while creating the brand.');
+        }
     }
 
     public function edit(Brand $brand)

@@ -197,6 +197,50 @@ Route::middleware(['auth', 'verified'])->group(function () {
         }
     })->middleware('auth');
 
+    // Debug route for brands issues
+    Route::get('/debug/brands', function () {
+        try {
+            $user = auth()->user();
+            if (!$user) {
+                return response()->json(['error' => 'User not authenticated'], 401);
+            }
+            
+            $brands = \App\Models\Brand::where('user_id', $user->id)->get();
+            
+            return response()->json([
+                'user_id' => $user->id,
+                'brands_count' => $brands->count(),
+                'brands' => $brands->toArray(),
+                'status' => 'success'
+            ]);
+        } catch (Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    })->middleware('auth');
+
+    // Test brands endpoint
+    Route::get('/test/brands', function () {
+        try {
+            $user = auth()->user();
+            if (!$user) {
+                return response()->json(['error' => 'User not authenticated'], 401);
+            }
+            
+            // Test the exact same query as the brands controller
+            $brands = \App\Models\Brand::where('user_id', $user->id)->latest()->get();
+            
+            return response()->json([
+                'user_id' => $user->id,
+                'brands_count' => $brands->count(),
+                'brands' => $brands->toArray(),
+                'status' => 'success'
+            ]);
+        } catch (Exception $e) {
+            \Log::error('Test Brands Error: ' . $e->getMessage());
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    })->middleware('auth');
+
     Route::get('/roles-permissions', [RolePermissionController::class, 'index'])
         ->name('roles-permissions.index');
     Route::post('/roles', [RolePermissionController::class, 'storeRole'])->name('roles.store');
