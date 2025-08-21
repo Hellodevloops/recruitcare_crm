@@ -87,21 +87,42 @@ class SendCandidateInfoToHr extends Mailable
                     ->withMime('application/pdf');
             }
 
-            // Add documents if exist
-            if ($candidate->documents && $candidate->documents->count() > 0) {
-                foreach ($candidate->documents as $document) {
-                    if ($document->path && file_exists(storage_path('app/public/' . $document->path))) {
-                        $documentName = $document->name ?? 'Document_' . $candidate->name;
-                        $documentType = $document->document_type ?? 'document';
-                        
-                        // Add candidate name to filename for better identification when multiple candidates
-                        $filename = $this->isMultiple 
-                            ? $candidate->name . '_' . $documentType . '_' . $documentName . '.pdf'
-                            : $documentType . '_' . $documentName . '.pdf';
-                        
-                        $attachments[] = Attachment::fromStorageDisk('public', $document->path)
-                            ->as($filename)
-                            ->withMime('application/pdf');
+            // Add documents if exist - handle both array and relationship
+            if ($candidate->documents) {
+                // Check if documents is a collection (relationship) or array
+                if ($candidate->documents instanceof \Illuminate\Database\Eloquent\Collection) {
+                    // Documents from relationship
+                    foreach ($candidate->documents as $document) {
+                        if ($document->path && file_exists(storage_path('app/public/' . $document->path))) {
+                            $documentName = $document->name ?? 'Document_' . $candidate->name;
+                            $documentType = $document->document_type ?? 'document';
+                            
+                            // Add candidate name to filename for better identification when multiple candidates
+                            $filename = $this->isMultiple 
+                                ? $candidate->name . '_' . $documentType . '_' . $documentName . '.pdf'
+                                : $documentType . '_' . $documentName . '.pdf';
+                            
+                            $attachments[] = Attachment::fromStorageDisk('public', $document->path)
+                                ->as($filename)
+                                ->withMime('application/pdf');
+                        }
+                    }
+                } elseif (is_array($candidate->documents)) {
+                    // Documents from array field
+                    foreach ($candidate->documents as $document) {
+                        if (isset($document['path']) && file_exists(storage_path('app/public/' . $document['path']))) {
+                            $documentName = $document['name'] ?? 'Document_' . $candidate->name;
+                            $documentType = $document['document_type'] ?? 'document';
+                            
+                            // Add candidate name to filename for better identification when multiple candidates
+                            $filename = $this->isMultiple 
+                                ? $candidate->name . '_' . $documentType . '_' . $documentName . '.pdf'
+                                : $documentType . '_' . $documentName . '.pdf';
+                            
+                            $attachments[] = Attachment::fromStorageDisk('public', $document['path'])
+                                ->as($filename)
+                                ->withMime('application/pdf');
+                        }
                     }
                 }
             }

@@ -12,8 +12,8 @@ class HrController extends Controller
     public function index()
     {
         return Inertia::render('hr/Index', [
-            'hrList' => Hr::with('brand')->latest()->get(),
-            'brands' => Brand::orderBy('name')->get(['id', 'name', 'email', 'phone', 'address'])
+            'hrList' => Hr::where('user_id', auth()->id())->with('brand')->latest()->get(),
+            'brands' => Brand::where('user_id', auth()->id())->orderBy('name')->get(['id', 'name', 'email', 'phone', 'address'])
         ]);
     }
 
@@ -24,6 +24,8 @@ class HrController extends Controller
             'email' => 'required|email|max:255',
             'brand_id' => 'required|exists:brands,id',
         ]);
+
+        $validated['user_id'] = auth()->id();
 
         Hr::create($validated);
 
@@ -39,6 +41,8 @@ class HrController extends Controller
             'address' => 'nullable|string|max:500',
         ]);
 
+        $validated['user_id'] = auth()->id();
+
         $brand = Brand::create($validated);
 
         return response()->json([
@@ -53,9 +57,13 @@ class HrController extends Controller
         $brandId = $request->query('brand_id');
         
         if ($brandId) {
-            $hrs = Hr::where('brand_id', $brandId)->get(['id', 'name', 'email']);
+            $hrs = Hr::where('brand_id', $brandId)
+                    ->where('user_id', auth()->id())
+                    ->get(['id', 'name', 'email']);
         } else {
-            $hrs = Hr::with('brand')->get(['id', 'name', 'email', 'brand_id']);
+            $hrs = Hr::where('user_id', auth()->id())
+                    ->with('brand')
+                    ->get(['id', 'name', 'email', 'brand_id']);
         }
         
         return response()->json($hrs);

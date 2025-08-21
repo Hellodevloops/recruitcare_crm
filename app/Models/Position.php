@@ -18,7 +18,8 @@ class Position extends Model
         'city',
         'budget',
         'designation',
-        'candidate_id'
+        'candidate_id',
+        'user_id'
     ];
 
     protected $casts = [
@@ -43,5 +44,10 @@ class Position extends Model
     public function deals()
     {
         return $this->hasMany(Deal::class);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 }

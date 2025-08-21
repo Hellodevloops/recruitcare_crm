@@ -22,7 +22,8 @@ class Deal extends Model
         'status',
         'priority',
         'due_date',
-        'tags'
+        'tags',
+        'user_id'
     ];
 
     protected $casts = [
@@ -46,7 +47,8 @@ class Deal extends Model
                 'status',
                 'priority',
                 'due_date',
-                'tags'
+                'tags',
+                'user_id'
             ])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs()
@@ -86,5 +88,10 @@ class Deal extends Model
     public function stage()
     {
         return $this->belongsTo(Stage::class);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 }

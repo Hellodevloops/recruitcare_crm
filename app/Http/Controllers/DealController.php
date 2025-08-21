@@ -25,6 +25,7 @@ class DealController extends Controller
             'pipeline', 
             'stage'
         ])
+        ->where('user_id', auth()->id())
         ->whereHas('candidate', function($query) {
             $query->where('owner_id', auth()->id());
         })
@@ -85,6 +86,8 @@ class DealController extends Controller
             'tags' => 'sometimes|array',
         ]);
 
+        $validated['user_id'] = auth()->id();
+
         $deal = Deal::create($validated);
         $deal->load(['brand', 'position', 'hr', 'pipeline', 'stage', 'candidate']);
 
@@ -112,8 +115,20 @@ class DealController extends Controller
             'stage_id' => 'required|exists:stages,id',
         ]);
 
+        // Load the position and brand to generate title and amount
+        $position = \App\Models\Position::find($validated['position_id']);
+        $brand = \App\Models\Brand::find($validated['brand_id']);
+        $candidate = \App\Models\Candidate::find($validated['candidate_id']);
+
+        // Generate title and amount automatically
+        $validated['title'] = $position ? $position->title : 'New Position';
+        $validated['amount'] = $position && $position->budget ? $position->budget : '0.00';
+        $validated['status'] = 'pending';
+        $validated['priority'] = 'medium';
+        $validated['user_id'] = auth()->id();
+
         $deal = Deal::create($validated);
-        $deal->load(['brand', 'position', 'hr', 'pipeline', 'stage']);
+        $deal->load(['brand', 'position', 'hr', 'pipeline', 'stage', 'candidate']);
 
         return response()->json([
             'message' => 'Deal created successfully',
@@ -123,12 +138,22 @@ class DealController extends Controller
 
     public function show(Deal $deal)
     {
+        // Check if the deal belongs to the current user
+        if ($deal->user_id !== auth()->id()) {
+            abort(403, 'Unauthorized access to this deal.');
+        }
+
         $deal->load(['brand', 'position', 'hr', 'pipeline', 'stage']);
         return response()->json($deal);
     }
 
     public function update(Request $request, Deal $deal)
     {
+        // Check if the deal belongs to the current user
+        if ($deal->user_id !== auth()->id()) {
+            abort(403, 'Unauthorized access to this deal.');
+        }
+
         $validated = $request->validate([
             'brand_id' => 'sometimes|exists:brands,id',
             'position_id' => 'sometimes|exists:positions,id',
@@ -154,6 +179,11 @@ class DealController extends Controller
 
     public function destroy(Deal $deal)
     {
+        // Check if the deal belongs to the current user
+        if ($deal->user_id !== auth()->id()) {
+            abort(403, 'Unauthorized access to this deal.');
+        }
+
         $deal->delete();
 
         if (request()->expectsJson()) {

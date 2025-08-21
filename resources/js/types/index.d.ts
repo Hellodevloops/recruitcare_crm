@@ -85,6 +85,13 @@ export interface Deal {
     hr_id?: number;
     pipeline_id: number;
     stage_id: number;
+    title?: string;
+    amount?: string;
+    status?: string;
+    priority?: 'low' | 'medium' | 'high';
+    due_date?: string;
+    tags?: string[];
+    user_id?: number;
     created_at: string;
     updated_at: string;
     brand?: Brand;
@@ -92,6 +99,7 @@ export interface Deal {
     hr?: Hr;
     pipeline?: Pipeline;
     stage?: Stage;
+    candidate?: Candidate;
 }
 
 export interface Activity {
@@ -142,6 +150,7 @@ export interface Stage {
 export interface Brand {
     id: number;
     name: string;
+    user_id?: number;
     created_at: string;
     updated_at: string;
 }
@@ -151,6 +160,7 @@ export interface Position {
     title: string;
     brand_id: number;
     hr_id: number;
+    user_id?: number;
     created_at: string;
     updated_at: string;
 }
@@ -160,6 +170,7 @@ export interface Hr {
     name: string;
     email: string;
     brand_id: number;
+    user_id?: number;
     created_at: string;
     updated_at: string;
 }

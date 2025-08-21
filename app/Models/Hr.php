@@ -13,10 +13,16 @@ class Hr extends Model
         'name',
         'email',
         'brand_id',
+        'user_id',
     ];
 
     public function brand(): BelongsTo
     {
         return $this->belongsTo(Brand::class);
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 } 

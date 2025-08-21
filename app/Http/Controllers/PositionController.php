@@ -15,7 +15,7 @@ class PositionController extends Controller
 {
     public function getPositionsData(Request $request)
     {
-        $query = Position::with(['brand', 'hr']);
+        $query = Position::with(['brand', 'hr'])->where('user_id', auth()->id());
         
         if ($request->has('brand_id')) {
             $query->where('brand_id', $request->brand_id);
@@ -30,7 +30,7 @@ class PositionController extends Controller
 
     public function index()
     {
-        $positions = Position::with(['brand', 'hr'])->latest()->get();
+        $positions = Position::where('user_id', auth()->id())->with(['brand', 'hr'])->latest()->get();
         
         return Inertia::render('positions/Index', [
             'positions' => $positions
@@ -39,8 +39,8 @@ class PositionController extends Controller
 
     public function create()
     {
-        $brands = Brand::all();
-        $hrs = Hr::with('brand')->get()->groupBy('brand_id');
+        $brands = Brand::where('user_id', auth()->id())->get();
+        $hrs = Hr::where('user_id', auth()->id())->with('brand')->get()->groupBy('brand_id');
         
         return Inertia::render('positions/Create', [
             'brands' => $brands,
@@ -65,6 +65,8 @@ class PositionController extends Controller
         $data = array_map(function ($value) {
             return $value === '' ? null : $value;
         }, $validated);
+
+        $data['user_id'] = auth()->id();
 
         Position::create($data);
 
@@ -107,9 +109,15 @@ class PositionController extends Controller
                 ->map(function($candidate) {
                     // Ensure documents are properly loaded
                     if ($candidate->documents) {
-                        $candidate->documents = $candidate->documents->filter(function($doc) {
-                            return $doc->type === 'personal';
-                        });
+                        if ($candidate->documents instanceof \Illuminate\Database\Eloquent\Collection) {
+                            $candidate->documents = $candidate->documents->filter(function($doc) {
+                                return $doc->type === 'personal';
+                            });
+                        } elseif (is_array($candidate->documents)) {
+                            $candidate->documents = collect($candidate->documents)->filter(function($doc) {
+                                return isset($doc['type']) && $doc['type'] === 'personal';
+                            })->toArray();
+                        }
                     }
                     return $candidate;
                 })
@@ -124,8 +132,13 @@ class PositionController extends Controller
 
     public function edit(Position $position)
     {
-        $brands = Brand::all();
-        $hrs = Hr::with('brand')->get()->groupBy('brand_id');
+        // Check if the position belongs to the current user
+        if ($position->user_id !== auth()->id()) {
+            abort(403, 'Unauthorized access to this position.');
+        }
+
+        $brands = Brand::where('user_id', auth()->id())->get();
+        $hrs = Hr::where('user_id', auth()->id())->with('brand')->get()->groupBy('brand_id');
         
         return Inertia::render('positions/Edit', [
             'position' => $position->load(['brand', 'hr']),
@@ -136,6 +149,11 @@ class PositionController extends Controller
 
     public function update(Request $request, Position $position)
     {
+        // Check if the position belongs to the current user
+        if ($position->user_id !== auth()->id()) {
+            abort(403, 'Unauthorized access to this position.');
+        }
+
         $validated = $request->validate([
             'brand_id' => 'nullable|exists:brands,id',
             'hr_id' => 'nullable|exists:hr,id',
@@ -206,6 +224,11 @@ class PositionController extends Controller
 
     public function destroy(Position $position)
     {
+        // Check if the position belongs to the current user
+        if ($position->user_id !== auth()->id()) {
+            abort(403, 'Unauthorized access to this position.');
+        }
+
         $position->delete();
         return redirect()->route('positions.index')->with('success', 'Position deleted successfully');
     }
