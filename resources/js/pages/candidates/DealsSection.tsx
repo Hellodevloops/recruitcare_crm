@@ -26,6 +26,12 @@ interface Deal {
     hr_id?: number;
     pipeline_id: number;
     stage_id: number;
+    title?: string;
+    amount?: string;
+    status?: string;
+    priority?: 'low' | 'medium' | 'high';
+    due_date?: string;
+    tags?: string[];
     created_at: string;
     updated_at: string;
     brand?: Brand;
@@ -33,6 +39,7 @@ interface Deal {
     hr?: Hr;
     pipeline?: Pipeline;
     stage?: Stage;
+    candidate?: Candidate;
 }
 
 interface NewDeal {
@@ -90,11 +97,21 @@ const DealItem: React.FC<{
                                     <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors cursor-pointer"
                                         onClick={() => onEdit(dealData)}
                                     >
-                                        {dealData.position?.title || 'Loading...'}
+                                        {dealData.title || dealData.position?.title || 'Loading...'}
                                     </h4>
                                     <Badge className="text-xs font-medium px-2 py-0.5 bg-indigo-100 text-indigo-800 border-indigo-200 hover:bg-indigo-200 transition-colors">
                                         {dealData.brand?.name || 'Loading...'}
                                     </Badge>
+                                    {dealData.status && (
+                                        <Badge className="text-xs font-medium px-2 py-0.5 bg-orange-100 text-orange-800 border-orange-200">
+                                            {dealData.status}
+                                        </Badge>
+                                    )}
+                                    {dealData.priority && (
+                                        <Badge className="text-xs font-medium px-2 py-0.5 bg-blue-100 text-blue-800 border-blue-200">
+                                            {dealData.priority}
+                                        </Badge>
+                                    )}
                                 </div>
                                 <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
                                     <span>{dealData.pipeline?.name || 'Loading...'}</span>
@@ -107,6 +124,11 @@ const DealItem: React.FC<{
                                         </>
                                     )}
                                 </div>
+                                {dealData.amount && (
+                                    <div className="text-sm font-medium text-green-600 dark:text-green-400">
+                                        ${dealData.amount}
+                                    </div>
+                                )}
                             </div>
                         </div>
                         <div className="flex gap-2 sm:flex-shrink-0">
@@ -123,7 +145,7 @@ const DealItem: React.FC<{
                                         </Button>
                                     </TooltipTrigger>
                                     <TooltipContent>
-                                        <p>Edit position</p>
+                                        <p>Edit deal</p>
                                     </TooltipContent>
                                 </Tooltip>
                             </TooltipProvider>
@@ -140,7 +162,7 @@ const DealItem: React.FC<{
                                         </Button>
                                     </TooltipTrigger>
                                     <TooltipContent>
-                                        <p>Delete position</p>
+                                        <p>Delete deal</p>
                                     </TooltipContent>
                                 </Tooltip>
                             </TooltipProvider>
@@ -519,10 +541,10 @@ const DealsSection: React.FC<DealsSectionProps> = ({ candidate, setCandidate }) 
                 <div>
                     <CardTitle className="text-lg sm:text-xl font-semibold text-gray-800 flex items-center gap-2">
                         <Briefcase className="h-5 w-5 text-indigo-600" />
-                        Positions
+                        Deals
                     </CardTitle>
                     <CardDescription className="text-sm text-gray-600 mt-1">
-                        Manage positions for {candidate.name}
+                        Manage deals for {candidate.name}
                     </CardDescription>
                 </div>
                 <TooltipProvider>
@@ -541,13 +563,13 @@ const DealsSection: React.FC<DealsSectionProps> = ({ candidate, setCandidate }) 
                                 ) : (
                                     <>
                                         <Plus className="h-4 w-4" />
-                                        <span>New Position</span>
+                                        <span>New Deal</span>
                                     </>
                                 )}
                             </Button>
                         </TooltipTrigger>
                         <TooltipContent>
-                            <p>{isFormOpen ? 'Cancel new position' : 'Create a new position'}</p>
+                            <p>{isFormOpen ? 'Cancel new deal' : 'Create a new deal'}</p>
                         </TooltipContent>
                     </Tooltip>
                 </TooltipProvider>
@@ -567,7 +589,7 @@ const DealsSection: React.FC<DealsSectionProps> = ({ candidate, setCandidate }) 
                                 <div className="p-4 bg-gradient-to-r from-slate-50 to-gray-50 rounded-md border border-gray-200 shadow-sm">
                                     <h3 className="text-lg font-medium text-gray-800 mb-4 flex items-center gap-2">
                                         <Plus className="h-4 w-4 text-indigo-600" />
-                                        New Position Information
+                                        New Deal Information
                                     </h3>
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                         {/* Brand Dropdown */}
@@ -786,7 +808,7 @@ const DealsSection: React.FC<DealsSectionProps> = ({ candidate, setCandidate }) 
                         )}
                     </AnimatePresence>
 
-                    {/* Positions List */}
+                    {/* Deals List */}
                     {localDeals.length > 0 ? (
                         <div className="space-y-4">
                             <AnimatePresence>
@@ -810,7 +832,7 @@ const DealsSection: React.FC<DealsSectionProps> = ({ candidate, setCandidate }) 
                             {totalPages > 1 && (
                                 <div className="flex items-center justify-between mt-6">
                                     <div className="text-sm text-gray-600">
-                                        Showing {indexOfFirstDeal + 1} to {Math.min(indexOfLastDeal, localDeals.length)} of {localDeals.length} positions
+                                        Showing {indexOfFirstDeal + 1} to {Math.min(indexOfLastDeal, localDeals.length)} of {localDeals.length} deals
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <Button
@@ -855,15 +877,15 @@ const DealsSection: React.FC<DealsSectionProps> = ({ candidate, setCandidate }) 
                     ) : (
                         <div className="text-center py-8 bg-gray-50 rounded-lg border border-dashed border-gray-200">
                             <Briefcase className="h-10 w-10 text-gray-300 mx-auto mb-3" />
-                            <p className="text-gray-500 mb-1">No positions yet</p>
-                            <p className="text-sm text-gray-400 mb-4">Create your first position to track opportunities with this candidate</p>
+                            <p className="text-gray-500 mb-1">No deals yet</p>
+                            <p className="text-sm text-gray-400 mb-4">Create your first deal to track opportunities with this candidate</p>
                             {!isFormOpen && (
                                 <Button
                                     variant="outline"
                                     className="bg-white border-indigo-300 text-indigo-600 hover:bg-indigo-50 hover:text-indigo-700 transition-all"
                                     onClick={() => setIsFormOpen(true)}
                                 >
-                                    <Plus className="h-4 w-4 mr-2" /> Add Your First Position
+                                    <Plus className="h-4 w-4 mr-2" /> Add Your First Deal
                                 </Button>
                             )}
                         </div>
@@ -871,14 +893,14 @@ const DealsSection: React.FC<DealsSectionProps> = ({ candidate, setCandidate }) 
                 </div>
             </CardContent>
 
-            {/* Edit Position Modal */}
+            {/* Edit Deal Modal */}
             {editingDeal && (
                 <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
                     <DialogContent className="sm:max-w-md">
                         <DialogHeader>
                             <DialogTitle className="text-lg font-semibold text-gray-800 flex items-center gap-2">
                                 <Edit className="h-4 w-4 text-indigo-600" />
-                                Edit Position
+                                Edit Deal
                             </DialogTitle>
                         </DialogHeader>
                         <div className="p-4 bg-gradient-to-r from-slate-50 to-gray-50 rounded-md border border-gray-200 mt-2">
