@@ -121,7 +121,7 @@ class DealController extends Controller
         $candidate = \App\Models\Candidate::find($validated['candidate_id']);
 
         // Generate title and amount automatically
-        $validated['title'] = $position ? $position->title : 'New Position';
+        $validated['title'] = $position ? $position->designation : 'New Position';
         $validated['amount'] = $position && $position->budget ? $position->budget : '0.00';
         $validated['status'] = 'pending';
         $validated['priority'] = 'medium';

@@ -97,7 +97,7 @@ const DealItem: React.FC<{
                                     <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors cursor-pointer"
                                         onClick={() => onEdit(dealData)}
                                     >
-                                        {dealData.title || dealData.position?.title || 'Loading...'}
+                                        {dealData.title || dealData.position?.designation || 'Loading...'}
                                     </h4>
                                     <Badge className="text-xs font-medium px-2 py-0.5 bg-indigo-100 text-indigo-800 border-indigo-200 hover:bg-indigo-200 transition-colors">
                                         {dealData.brand?.name || 'Loading...'}
@@ -652,7 +652,7 @@ const DealsSection: React.FC<DealsSectionProps> = ({ candidate, setCandidate }) 
                                                                 value={position.id.toString()}
                                                                 className="hover:bg-indigo-50 text-sm"
                                                             >
-                                                                {position.title}
+                                                                {position.designation}
                                                             </SelectItem>
                                                         ))
                                                     ) : (
@@ -791,7 +791,7 @@ const DealsSection: React.FC<DealsSectionProps> = ({ candidate, setCandidate }) 
                                                 </span>
                                             ) : (
                                                 <span className="flex items-center justify-center gap-2">
-                                                    <Plus className="h-4 w-4" /> Create Position
+                                                    <Plus className="h-4 w-4" /> Create Deal
                                                 </span>
                                             )}
                                         </Button>
@@ -965,7 +965,7 @@ const DealsSection: React.FC<DealsSectionProps> = ({ candidate, setCandidate }) 
                                                         value={position.id.toString()}
                                                         className="hover:bg-indigo-50 text-sm"
                                                     >
-                                                        {position.title}
+                                                        {position.designation}
                                                     </SelectItem>
                                                 ))
                                             ) : (

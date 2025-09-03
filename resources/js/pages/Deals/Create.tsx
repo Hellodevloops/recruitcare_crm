@@ -349,7 +349,7 @@ export default function CreateDeal({ pipelines, flash }: Props) {
                                         <SelectContent>
                                             {positions.map((position) => (
                                                 <SelectItem key={position.id} value={position.id.toString()}>
-                                                    {position.title}
+                                                    {position.designation}
                                                 </SelectItem>
                                             ))}
                                         </SelectContent>

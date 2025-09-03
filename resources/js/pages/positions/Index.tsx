@@ -28,12 +28,11 @@ interface Position {
         id: number;
         email: string;
     } | null;
-    title: string;
+    designation: string;
     experience: string | null;
     store: string | null;
     city: string | null;
     budget: number | null;
-    designation: string | null;
 }
 
 interface Props extends PageProps {
@@ -69,21 +68,20 @@ export default function Index({ positions = [] }: Props) {
                             <Table>
                                 <TableHeader>
                                     <TableRow>
-                                        <TableHead>Title</TableHead>
+                                        <TableHead>Designation</TableHead>
                                         <TableHead>Brand</TableHead>
                                         <TableHead>HR</TableHead>
                                         <TableHead>Experience</TableHead>
                                         <TableHead>Store</TableHead>
                                         <TableHead>City</TableHead>
                                         <TableHead>Budget</TableHead>
-                                        <TableHead>Designation</TableHead>
                                         <TableHead className="text-right">Actions</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
                                     {positions?.map((position) => (
                                         <TableRow key={position.id}>
-                                            <TableCell>{position.title}</TableCell>
+                                            <TableCell>{position.designation}</TableCell>
                                             <TableCell>{position.brand?.name || 'N/A'}</TableCell>
                                             <TableCell>{position.hr?.email || 'N/A'}</TableCell>
                                             <TableCell>{position.experience || 'N/A'}</TableCell>
@@ -92,7 +90,6 @@ export default function Index({ positions = [] }: Props) {
                                             <TableCell>
                                                 {position.budget ? `₹${position.budget.toLocaleString('en-IN')}` : 'N/A'}
                                             </TableCell>
-                                            <TableCell>{position.designation || 'N/A'}</TableCell>
                                             <TableCell>
                                                 <div className="flex gap-2 justify-end">
                                                     <Link href={`/positions/${position.id}`}>

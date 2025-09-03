@@ -369,7 +369,7 @@ export default function Deals() {
                 deal.candidate.email.toLowerCase().includes(query) ||
                 (deal.candidate.company && deal.candidate.company.toLowerCase().includes(query)) ||
                 (deal.brand?.name && deal.brand.name.toLowerCase().includes(query)) ||
-                (deal.position?.title && deal.position.title.toLowerCase().includes(query))
+                (deal.position?.designation && deal.position.designation.toLowerCase().includes(query))
             );
         }
         
@@ -455,8 +455,8 @@ export default function Deals() {
                         valueB = b.brand?.name || '';
                         break;
                     case 'position':
-                        valueA = a.position?.title || '';
-                        valueB = b.position?.title || '';
+                        valueA = a.position?.designation || '';
+                        valueB = b.position?.designation || '';
                         break;
                     default:
                         valueA = a[sortConfig.column as keyof Deal];
@@ -927,7 +927,7 @@ export default function Deals() {
                                             </TableCell>
                                             <TableCell>
                                                 <div className="font-medium text-sm">
-                                                    {deal.position?.title || 'N/A'}
+                                                    {deal.position?.designation || 'N/A'}
                                                 </div>
                                             </TableCell>
                                             <TableCell>
