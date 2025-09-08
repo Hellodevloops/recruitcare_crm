@@ -177,6 +177,7 @@ export interface Hr {
     email: string;
     brand_id: number;
     user_id?: number;
+    brand?: Brand;
     created_at: string;
     updated_at: string;
 }
