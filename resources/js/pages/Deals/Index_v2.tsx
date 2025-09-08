@@ -160,6 +160,7 @@ interface Props {
         success?: string;
         deal?: Deal;
     };
+    [key: string]: any;
 }
 
 // Added priority colors
@@ -305,7 +306,7 @@ export default function Deals() {
 
         router.put(
             `/deals/${selectedDeal.id}`,
-            formData,
+            formData as any,
             {
                 preserveState: true,
                 preserveScroll: true,
@@ -369,7 +370,7 @@ export default function Deals() {
                 deal.candidate.email.toLowerCase().includes(query) ||
                 (deal.candidate.company && deal.candidate.company.toLowerCase().includes(query)) ||
                 (deal.brand?.name && deal.brand.name.toLowerCase().includes(query)) ||
-                (deal.position?.designation && deal.position.designation.toLowerCase().includes(query))
+                (deal.position?.title && deal.position.title.toLowerCase().includes(query))
             );
         }
         
@@ -455,8 +456,8 @@ export default function Deals() {
                         valueB = b.brand?.name || '';
                         break;
                     case 'position':
-                        valueA = a.position?.designation || '';
-                        valueB = b.position?.designation || '';
+                        valueA = a.position?.title || '';
+                        valueB = b.position?.title || '';
                         break;
                     default:
                         valueA = a[sortConfig.column as keyof Deal];
@@ -582,17 +583,7 @@ export default function Deals() {
                                             View Candidate
                                         </DropdownMenuItem>
                                         <DropdownMenuItem onClick={() => {
-                                            setSelectedDeal(deal);
-                                            setIsEditMode(true);
-                                            setFormData({
-                                                title: deal.title,
-                                                amount: deal.amount,
-                                                status: deal.status,
-                                                pipeline_id: deal.pipeline_id,
-                                                stage_id: deal.stage_id,
-                                                priority: deal.priority,
-                                                due_date: deal.due_date
-                                            });
+                                            router.visit(`/deals/${deal.id}/edit`);
                                         }}>
                                             <Edit className="h-4 w-4 mr-2" />
                                             Edit Deal
@@ -642,6 +633,7 @@ export default function Deals() {
                                 droppableId={stage.id.toString()}
                                 isDropDisabled={false}
                                 isCombineEnabled={false}
+                                ignoreContainerClipping={false}
                             >
                                 {(provided, snapshot) => (
                                     <div 
@@ -927,7 +919,7 @@ export default function Deals() {
                                             </TableCell>
                                             <TableCell>
                                                 <div className="font-medium text-sm">
-                                                    {deal.position?.designation || 'N/A'}
+                                                    {deal.position?.title || 'N/A'}
                                                 </div>
                                             </TableCell>
                                             <TableCell>
@@ -1031,17 +1023,7 @@ export default function Deals() {
                                                                 View Candidate
                                                             </DropdownMenuItem>
                                                             <DropdownMenuItem onClick={() => {
-                                                                setSelectedDeal(deal);
-                                                                setIsEditMode(true);
-                                                                setFormData({
-                                                                    title: deal.title,
-                                                                    amount: deal.amount,
-                                                                    status: deal.status,
-                                                                    pipeline_id: deal.pipeline_id,
-                                                                    stage_id: deal.stage_id,
-                                                                    priority: deal.priority,
-                                                                    due_date: deal.due_date
-                                                                });
+                                                                router.visit(`/deals/${deal.id}/edit`);
                                                             }}>
                                                                 <Edit className="h-4 w-4 mr-2" />
                                                                 Edit Deal
@@ -1602,16 +1584,7 @@ export default function Deals() {
                                     Close
                                 </Button>
                                 <Button onClick={() => {
-                                    setIsEditMode(true);
-                                    setFormData({
-                                        title: selectedDeal?.title,
-                                        amount: selectedDeal?.amount,
-                                        status: selectedDeal?.status,
-                                        pipeline_id: selectedDeal?.pipeline_id,
-                                        stage_id: selectedDeal?.stage_id,
-                                        priority: selectedDeal?.priority,
-                                        due_date: selectedDeal?.due_date
-                                    });
+                                    router.visit(`/deals/${selectedDeal?.id}/edit`);
                                 }}>
                                     <Edit className="h-4 w-4 mr-2" />
                                     Edit Deal

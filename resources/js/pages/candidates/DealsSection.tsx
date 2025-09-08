@@ -10,13 +10,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-} from '@/components/ui/dialog';
 import { toast } from 'sonner';
+import { router } from '@inertiajs/react';
 
 interface Deal {
     id: number;
@@ -190,9 +185,6 @@ const DealsSection: React.FC<DealsSectionProps> = ({ candidate, setCandidate }) 
     const [isFormOpen, setIsFormOpen] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
-    const [editingDeal, setEditingDeal] = useState<Deal | null>(null);
-    const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
-    const [editFormData, setEditFormData] = useState<Partial<NewDeal>>({});
     const [localDeals, setLocalDeals] = useState<Deal[]>(candidate.deals || []);
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [itemsPerPage] = useState<number>(5);
@@ -292,10 +284,6 @@ const DealsSection: React.FC<DealsSectionProps> = ({ candidate, setCandidate }) 
         }
     };
 
-    // Handle edit form input changes
-    const handleEditInputChange = (field: string, value: string) =>     {
-        setEditFormData(prev => ({ ...prev, [field]: value }));
-    };
 
     // Validate form
     const validateForm = (): boolean => {
@@ -309,17 +297,6 @@ const DealsSection: React.FC<DealsSectionProps> = ({ candidate, setCandidate }) 
         return Object.keys(errors).length === 0;
     };
 
-    // Validate edit form
-    const validateEditForm = (): boolean => {
-        const errors: { [key: string]: string } = {};
-        if (!editFormData.brand_id) errors.brand_id = 'Please select a brand';
-        if (!editFormData.position_id) errors.position_id = 'Please select a position';
-        if (!editFormData.hr_id) errors.hr_id = 'Please select an HR';
-        if (!editFormData.pipeline_id) errors.pipeline_id = 'Please select a pipeline';
-        if (!editFormData.stage_id) errors.stage_id = 'Please select a stage';
-        setFormErrors(errors);
-        return Object.keys(errors).length === 0;
-    };
 
     // Handle adding a new deal
     const handleAddDeal = async () => {
@@ -376,79 +353,11 @@ const DealsSection: React.FC<DealsSectionProps> = ({ candidate, setCandidate }) 
         setHrs([]);
     };
 
-    // Reset edit form
-    const resetEditForm = () => {
-        setEditFormData({});
-        setEditingDeal(null);
-        setIsEditModalOpen(false);
-        setFormErrors({});
-        setStages([]);
-        setPositions([]);
-        setHrs([]);
-    };
-
-    // Handle opening edit modal
+    // Handle opening edit page
     const handleEditClick = (deal: Deal) => {
-        setEditingDeal(deal);
-        setEditFormData({
-            brand_id: deal.brand_id.toString(),
-            position_id: deal.position_id.toString(),
-            hr_id: deal.hr_id?.toString() || '',
-            pipeline_id: deal.pipeline_id.toString(),
-            stage_id: deal.stage_id.toString(),
-        });
-        fetchStages(deal.pipeline_id.toString());
-        fetchPositions(deal.brand_id.toString());
-        fetchHrs(deal.brand_id.toString());
-        setIsEditModalOpen(true);
+        router.visit(`/deals/${deal.id}/edit`);
     };
 
-    // Handle editing a deal
-    const handleUpdateDeal = async () => {
-        if (!editingDeal || !validateEditForm()) return;
-
-        setIsLoading(true);
-        try {
-            const response = await axios.put<{message: string; deal: Deal}>(`/deals/${editingDeal.id}`, {
-                brand_id: parseInt(editFormData.brand_id!),
-                position_id: parseInt(editFormData.position_id!),
-                hr_id: parseInt(editFormData.hr_id!),
-                pipeline_id: parseInt(editFormData.pipeline_id!),
-                stage_id: parseInt(editFormData.stage_id!),
-            });
-
-            const { deal: updatedDeal, message } = response.data;
-            
-            // Update local state
-            setLocalDeals(prevDeals =>
-                prevDeals.map(deal => (deal.id === editingDeal.id ? updatedDeal : deal))
-            );
-            
-            // Update parent state with new deals array
-            const updatedCandidate = {
-                ...candidate,
-                deals: candidate.deals.map(deal =>
-                    deal.id === editingDeal.id ? updatedDeal : deal
-                ),
-            };
-            setCandidate(updatedCandidate);
-
-            // Show success message
-            toast.success(message || 'Deal updated successfully');
-
-            // Close modal and reset form
-            setIsEditModalOpen(false);
-            setEditingDeal(null);
-            setEditFormData({});
-            setStages([]);
-
-        } catch (error) {
-            console.error('Failed to update deal:', error);
-            toast.error('Failed to update deal. Please try again.');
-        } finally {
-            setIsLoading(false);
-        }
-    };
 
     // Handle deleting a deal
     const handleDeleteDeal = async (dealId: number) => {
@@ -490,36 +399,15 @@ const DealsSection: React.FC<DealsSectionProps> = ({ candidate, setCandidate }) 
         fetchHrs(value);
     };
 
-    // Handle edit brand selection
-    const handleEditBrandChange = (value: string) => {
-        handleEditInputChange('brand_id', value);
-        handleEditInputChange('position_id', '');
-        handleEditInputChange('hr_id', '');
-        fetchPositions(value);
-        fetchHrs(value);
-    };
-
     // Handle position selection
     const handlePositionChange = (value: string) => {
         handleInputChange('position_id', value);
-    };
-
-    // Handle edit position selection
-    const handleEditPositionChange = (value: string) => {
-        handleEditInputChange('position_id', value);
     };
 
     // Handle pipeline selection
     const handlePipelineChange = (value: string) => {
         handleInputChange('pipeline_id', value);
         handleInputChange('stage_id', '');
-        fetchStages(value);
-    };
-
-    // Handle edit pipeline selection
-    const handleEditPipelineChange = (value: string) => {
-        handleEditInputChange('pipeline_id', value);
-        handleEditInputChange('stage_id', '');
         fetchStages(value);
     };
 
@@ -893,233 +781,6 @@ const DealsSection: React.FC<DealsSectionProps> = ({ candidate, setCandidate }) 
                 </div>
             </CardContent>
 
-            {/* Edit Deal Modal */}
-            {editingDeal && (
-                <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
-                    <DialogContent className="sm:max-w-md">
-                        <DialogHeader>
-                            <DialogTitle className="text-lg font-semibold text-gray-800 flex items-center gap-2">
-                                <Edit className="h-4 w-4 text-indigo-600" />
-                                Edit Deal
-                            </DialogTitle>
-                        </DialogHeader>
-                        <div className="p-4 bg-gradient-to-r from-slate-50 to-gray-50 rounded-md border border-gray-200 mt-2">
-                            <div className="grid grid-cols-1 gap-4">
-                                {/* Brand Dropdown */}
-                                <div className="space-y-1">
-                                    <Label htmlFor="edit-brand" className={`text-sm font-medium ${formErrors.brand_id ? 'text-red-500' : 'text-gray-700'}`}>
-                                        Brand*
-                                    </Label>
-                                    <Select
-                                        value={editFormData.brand_id || ''}
-                                        onValueChange={handleEditBrandChange}
-                                    >
-                                        <SelectTrigger
-                                            id="edit-brand"
-                                            className={`bg-white border ${formErrors.brand_id ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : 'border-gray-200 focus:ring-indigo-500 focus:border-indigo-500'} rounded-md text-sm`}
-                                        >
-                                            <SelectValue placeholder="Select brand" />
-                                        </SelectTrigger>
-                                        <SelectContent className="bg-white border-gray-200 rounded-md shadow-lg">
-                                            {brands.length > 0 ? (
-                                                brands.map((brand) => (
-                                                    <SelectItem
-                                                        key={brand.id}
-                                                        value={brand.id.toString()}
-                                                        className="hover:bg-indigo-50 text-sm"
-                                                    >
-                                                        {brand.name}
-                                                    </SelectItem>
-                                                ))
-                                            ) : (
-                                                <SelectItem value="loading" disabled className="text-sm text-gray-400">
-                                                    Loading brands...
-                                                </SelectItem>
-                                            )}
-                                        </SelectContent>
-                                    </Select>
-                                    {formErrors.brand_id && <p className="text-xs text-red-500 mt-1">{formErrors.brand_id}</p>}
-                                </div>
-
-                                {/* Position Dropdown */}
-                                <div className="space-y-1">
-                                    <Label htmlFor="edit-position" className={`text-sm font-medium ${formErrors.position_id ? 'text-red-500' : 'text-gray-700'}`}>
-                                        Position*
-                                    </Label>
-                                    <Select
-                                        value={editFormData.position_id || ''}
-                                        onValueChange={handleEditPositionChange}
-                                        disabled={!editFormData.brand_id}
-                                    >
-                                        <SelectTrigger
-                                            id="edit-position"
-                                            className={`bg-white border ${formErrors.position_id ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : 'border-gray-200 focus:ring-indigo-500 focus:border-indigo-500'} rounded-md text-sm`}
-                                        >
-                                            <SelectValue placeholder={!editFormData.brand_id ? 'Select a brand first' : 'Select position'} />
-                                        </SelectTrigger>
-                                        <SelectContent className="bg-white border-gray-200 rounded-md shadow-lg">
-                                            {positions.length > 0 ? (
-                                                positions.map((position) => (
-                                                    <SelectItem
-                                                        key={position.id}
-                                                        value={position.id.toString()}
-                                                        className="hover:bg-indigo-50 text-sm"
-                                                    >
-                                                        {position.designation}
-                                                    </SelectItem>
-                                                ))
-                                            ) : (
-                                                <SelectItem value="loading" disabled className="text-sm text-gray-400">
-                                                    {editFormData.brand_id ? 'Loading positions...' : 'Select a brand first'}
-                                                </SelectItem>
-                                            )}
-                                        </SelectContent>
-                                    </Select>
-                                    {formErrors.position_id && <p className="text-xs text-red-500 mt-1">{formErrors.position_id}</p>}
-                                </div>
-
-                                {/* HR Dropdown */}
-                                <div className="space-y-1">
-                                    <Label htmlFor="edit-hr" className={`text-sm font-medium ${formErrors.hr_id ? 'text-red-500' : 'text-gray-700'}`}>
-                                        HR*
-                                    </Label>
-                                    <Select
-                                        value={editFormData.hr_id || ''}
-                                        onValueChange={(value) => handleEditInputChange('hr_id', value)}
-                                        disabled={!editFormData.brand_id}
-                                    >
-                                        <SelectTrigger
-                                            id="edit-hr"
-                                            className={`bg-white border ${formErrors.hr_id ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : 'border-gray-200 focus:ring-indigo-500 focus:border-indigo-500'} rounded-md text-sm`}
-                                        >
-                                            <SelectValue placeholder={!editFormData.brand_id ? 'Select a brand first' : 'Select HR'} />
-                                        </SelectTrigger>
-                                        <SelectContent className="bg-white border-gray-200 rounded-md shadow-lg">
-                                            {hrs.length > 0 ? (
-                                                hrs.map((hr) => (
-                                                    <SelectItem
-                                                        key={hr.id}
-                                                        value={hr.id.toString()}
-                                                        className="hover:bg-indigo-50 text-sm"
-                                                    >
-                                                        {hr.name}
-                                                    </SelectItem>
-                                                ))
-                                            ) : (
-                                                <SelectItem value="loading" disabled className="text-sm text-gray-400">
-                                                    {editFormData.brand_id ? 'Loading HR...' : 'Select a brand first'}
-                                                </SelectItem>
-                                            )}
-                                        </SelectContent>
-                                    </Select>
-                                    {formErrors.hr_id && <p className="text-xs text-red-500 mt-1">{formErrors.hr_id}</p>}
-                                </div>
-
-                                {/* Pipeline Dropdown */}
-                                <div className="space-y-1">
-                                    <Label htmlFor="edit-pipeline" className={`text-sm font-medium ${formErrors.pipeline_id ? 'text-red-500' : 'text-gray-700'}`}>
-                                        Pipeline*
-                                    </Label>
-                                    <Select
-                                        value={editFormData.pipeline_id || ''}
-                                        onValueChange={handleEditPipelineChange}
-                                    >
-                                        <SelectTrigger
-                                            id="edit-pipeline"
-                                            className={`bg-white border ${formErrors.pipeline_id ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : 'border-gray-200 focus:ring-indigo-500 focus:border-indigo-500'} rounded-md text-sm`}
-                                        >
-                                            <SelectValue placeholder="Select pipeline" />
-                                        </SelectTrigger>
-                                        <SelectContent className="bg-white border-gray-200 rounded-md shadow-lg">
-                                            {pipelines.length > 0 ? (
-                                                pipelines.map((pipeline) => (
-                                                    <SelectItem
-                                                        key={pipeline.id}
-                                                        value={pipeline.id.toString()}
-                                                        className="hover:bg-indigo-50 text-sm"
-                                                    >
-                                                        {pipeline.name}
-                                                    </SelectItem>
-                                                ))
-                                            ) : (
-                                                <SelectItem value="loading" disabled className="text-sm text-gray-400">
-                                                    Loading pipelines...
-                                                </SelectItem>
-                                            )}
-                                        </SelectContent>
-                                    </Select>
-                                    {formErrors.pipeline_id && <p className="text-xs text-red-500 mt-1">{formErrors.pipeline_id}</p>}
-                                </div>
-
-                                {/* Stage Dropdown */}
-                                <div className="space-y-1">
-                                    <Label htmlFor="edit-stage" className={`text-sm font-medium ${formErrors.stage_id ? 'text-red-500' : 'text-gray-700'}`}>
-                                        Stage*
-                                    </Label>
-                                    <Select
-                                        value={editFormData.stage_id || ''}
-                                        onValueChange={(value) => handleEditInputChange('stage_id', value)}
-                                        disabled={!editFormData.pipeline_id}
-                                    >
-                                        <SelectTrigger
-                                            id="edit-stage"
-                                            className={`bg-white border ${formErrors.stage_id ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : 'border-gray-200 focus:ring-indigo-500 focus:border-indigo-500'} rounded-md text-sm`}
-                                        >
-                                            <SelectValue placeholder={!editFormData.pipeline_id ? 'Select a pipeline first' : 'Select stage'} />
-                                        </SelectTrigger>
-                                        <SelectContent className="bg-white border-gray-200 rounded-md shadow-lg">
-                                            {stages.length > 0 ? (
-                                                stages.map((stage) => (
-                                                    <SelectItem
-                                                        key={stage.id}
-                                                        value={stage.id.toString()}
-                                                        className="hover:bg-indigo-50 text-sm"
-                                                    >
-                                                        {stage.name}
-                                                    </SelectItem>
-                                                ))
-                                            ) : (
-                                                <SelectItem value="loading" disabled className="text-sm text-gray-400">
-                                                    {editFormData.pipeline_id ? 'Loading stages...' : 'Select a pipeline first'}
-                                                </SelectItem>
-                                            )}
-                                        </SelectContent>
-                                    </Select>
-                                    {formErrors.stage_id && <p className="text-xs text-red-500 mt-1">{formErrors.stage_id}</p>}
-                                </div>
-                            </div>
-                            <div className="flex flex-col sm:flex-row gap-3 mt-6">
-                                <Button
-                                    onClick={handleUpdateDeal}
-                                    disabled={isLoading}
-                                    className="bg-indigo-600 text-white hover:bg-indigo-700 rounded-md shadow-sm transition-all text-sm font-medium disabled:bg-indigo-300 flex-1"
-                                >
-                                    {isLoading ? (
-                                        <span className="flex items-center justify-center gap-2">
-                                            <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
-                                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8h-8z" />
-                                            </svg>
-                                            Updating...
-                                        </span>
-                                    ) : (
-                                        <span className="flex items-center justify-center gap-2">
-                                            <Edit className="h-4 w-4" /> Update Deal
-                                        </span>
-                                    )}
-                                </Button>
-                                <Button
-                                    variant="outline"
-                                    onClick={resetEditForm}
-                                    className="border-gray-300 text-gray-700 hover:bg-gray-50 rounded-md text-sm font-medium"
-                                >
-                                    Cancel
-                                </Button>
-                            </div>
-                        </div>
-                    </DialogContent>
-                </Dialog>
-            )}
         </Card>
     );
 };

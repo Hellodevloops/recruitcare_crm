@@ -114,11 +114,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Stage routes
     Route::get('/stages', [StageController::class, 'index'])->name('stages.index');
-    Route::post('/stages', [StageController::class, 'store'])->name('stages.store');
+    Route::post('/pipelines/{pipeline}/stages', [StageController::class, 'store'])->name('stages.store');
     Route::get('/stages/{stage}/edit', [StageController::class, 'edit'])->name('stages.edit');
     Route::put('/stages/{stage}', [StageController::class, 'update'])->name('stages.update');
     Route::delete('/stages/{stage}', [StageController::class, 'destroy'])->name('stages.destroy');
-    Route::post('/stages/reorder', [StageController::class, 'reorder'])->name('stages.reorder');
+    Route::post('/pipelines/{pipeline}/stages/reorder', [StageController::class, 'reorder'])->name('stages.reorder');
     Route::get('/stages-data', [StageController::class, 'getStagesData'])->name('stages.data');
 
     Route::get('/hr', [HrController::class, 'index'])->name('hr.index');
@@ -133,9 +133,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::put('/pipelines/{pipeline}', [PipelineController::class, 'update'])->name('pipelines.update');
     Route::delete('/pipelines/{pipeline}', [PipelineController::class, 'destroy'])->name('pipelines.destroy');
     Route::get('/pipelines-data', [PipelineController::class, 'data'])->name('pipelines.data');
+    Route::get('/pipelines-form-data', [PipelineController::class, 'getFormData'])->name('pipelines.form-data');
 
     // Resource routes for Deals, Activities, Notes, and Documents
-    Route::resource('deals', DealController::class)->only(['index', 'create', 'store', 'show', 'update', 'destroy']);
+    Route::resource('deals', DealController::class)->only(['index', 'create', 'store', 'show', 'edit', 'update', 'destroy']);
     Route::post('deals_store_in_candidate', [DealController::class, 'deals_store_in_candidate'])->name('deals_store_in_candidate');
 
     Route::resource('activities', ActivityController::class)->only(['index', 'store', 'show', 'update', 'destroy']);

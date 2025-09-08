@@ -47,13 +47,20 @@ class StageController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
+            'order' => 'nullable|integer',
         ]);
+
+        // If no order is provided, set it to the next available order
+        if (!isset($validated['order'])) {
+            $maxOrder = $pipeline->stages()->max('order') ?? 0;
+            $validated['order'] = $maxOrder + 1;
+        }
 
         $pipeline->stages()->create($validated);
 
         return redirect()->route('pipelines.show', $pipeline)->with('success', 'Stage added successfully');
     }
-    public function reorder(Request $request, $pipelineId)
+    public function reorder(Request $request, Pipeline $pipeline)
     {
         $request->validate([
             'stages' => 'required|array',
@@ -63,7 +70,7 @@ class StageController extends Controller
 
         foreach ($request->stages as $stageData) {
             Stage::where('id', $stageData['id'])
-                ->where('pipeline_id', $pipelineId)
+                ->where('pipeline_id', $pipeline->id)
                 ->update(['order' => $stageData['order']]);
         }
 

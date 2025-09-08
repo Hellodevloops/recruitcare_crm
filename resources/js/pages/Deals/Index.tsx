@@ -88,6 +88,7 @@ interface Props {
         success?: string;
         deal?: Deal;
     };
+    [key: string]: any;
 }
 
 export default function Deals() {
@@ -233,7 +234,7 @@ export default function Deals() {
                             </p>
                         </div>
                         <div className="flex items-center gap-2">
-                            <Badge variant={deal.status === 'pending' ? 'default' : 'success'}>
+                            <Badge variant={deal.status === 'pending' ? 'default' : 'secondary'}>
                                 {deal.status}
                             </Badge>
                             <Button 
@@ -288,7 +289,7 @@ export default function Deals() {
                 <div className="overflow-x-auto">
                     <div className="grid grid-flow-col auto-cols-[minmax(300px,1fr)] gap-4">
                         {stages.map(stage => (
-                            <Droppable key={stage.id} droppableId={stage.id.toString()}>
+                            <Droppable key={stage.id} droppableId={stage.id.toString()} ignoreContainerClipping={false}>
                                 {(provided, snapshot) => (
                                     <div 
                                         ref={provided.innerRef} 
