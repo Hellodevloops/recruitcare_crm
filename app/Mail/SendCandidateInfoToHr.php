@@ -46,8 +46,8 @@ class SendCandidateInfoToHr extends Mailable
     public function envelope(): Envelope
     {
         $subject = $this->isMultiple 
-            ? 'Multiple Candidates Information for Position: ' . $this->position->title
-            : 'Candidate Information for Position: ' . $this->position->title;
+            ? 'Multiple Candidates Information for Position: ' . $this->position->designation
+            : 'Candidate Information for Position: ' . $this->position->designation;
             
         return new Envelope(
             subject: $subject,

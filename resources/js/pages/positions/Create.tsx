@@ -35,12 +35,11 @@ export default function Create({ brands, hrs }: Props) {
     const { data, setData, post, processing, errors } = useForm({
         brand_id: '',
         hr_id: '',
-        title: '',
+        designation: '',
         experience: '',
         store: '',
         city: '',
         budget: '',
-        designation: '',
     });
 
     // Reset HR selection when brand changes
@@ -109,24 +108,26 @@ export default function Create({ brands, hrs }: Props) {
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="title">Title <span className="text-red-500">*</span></Label>
+                                <Label htmlFor="designation">Designation <span className="text-red-500">*</span></Label>
                                 <Input
-                                    id="title"
+                                    id="designation"
                                     type="text"
-                                    value={data.title}
-                                    onChange={e => setData('title', e.target.value)}
+                                    value={data.designation}
+                                    onChange={e => setData('designation', e.target.value)}
                                     required
+                                    placeholder="Enter designation"
                                 />
-                                {errors.title && <div className="text-red-500">{errors.title}</div>}
+                                {errors.designation && <div className="text-red-500">{errors.designation}</div>}
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="experience">Experience (Optional)</Label>
+                                <Label htmlFor="experience">Experience <span className="text-red-500">*</span></Label>
                                 <Input
                                     id="experience"
                                     type="text"
                                     value={data.experience}
                                     onChange={e => setData('experience', e.target.value)}
+                                    required
                                     placeholder="Enter experience requirements"
                                 />
                                 {errors.experience && <div className="text-red-500">{errors.experience}</div>}
@@ -171,18 +172,6 @@ export default function Create({ brands, hrs }: Props) {
                                     />
                                 </div>
                                 {errors.budget && <div className="text-red-500">{errors.budget}</div>}
-                            </div>
-
-                            <div className="space-y-2">
-                                <Label htmlFor="designation">Designation (Optional)</Label>
-                                <Input
-                                    id="designation"
-                                    type="text"
-                                    value={data.designation}
-                                    onChange={e => setData('designation', e.target.value)}
-                                    placeholder="Enter designation"
-                                />
-                                {errors.designation && <div className="text-red-500">{errors.designation}</div>}
                             </div>
 
                             <div className="flex justify-end pt-4">

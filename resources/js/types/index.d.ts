@@ -157,9 +157,15 @@ export interface Brand {
 
 export interface Position {
     id: number;
-    title: string;
-    brand_id: number;
-    hr_id: number;
+    title?: string;
+    designation?: string;
+    brand_id?: number;
+    hr_id?: number;
+    experience?: string;
+    store?: string;
+    city?: string;
+    budget?: number;
+    candidate_id?: number;
     user_id?: number;
     created_at: string;
     updated_at: string;
@@ -171,6 +177,7 @@ export interface Hr {
     email: string;
     brand_id: number;
     user_id?: number;
+    brand?: Brand;
     created_at: string;
     updated_at: string;
 }

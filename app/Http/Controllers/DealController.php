@@ -121,7 +121,7 @@ class DealController extends Controller
         $candidate = \App\Models\Candidate::find($validated['candidate_id']);
 
         // Generate title and amount automatically
-        $validated['title'] = $position ? $position->title : 'New Position';
+        $validated['title'] = $position ? $position->designation : 'New Position';
         $validated['amount'] = $position && $position->budget ? $position->budget : '0.00';
         $validated['status'] = 'pending';
         $validated['priority'] = 'medium';
@@ -147,6 +147,38 @@ class DealController extends Controller
         return response()->json($deal);
     }
 
+    public function edit(Deal $deal)
+    {
+        // Check if the deal belongs to the current user
+        if ($deal->user_id !== auth()->id()) {
+            abort(403, 'Unauthorized access to this deal.');
+        }
+
+        $deal->load(['brand', 'position', 'hr', 'pipeline', 'stage', 'candidate']);
+        
+        // Get all necessary data for the edit form
+        $brands = \App\Models\Brand::all();
+        $pipelines = Pipeline::all();
+        $stages = \App\Models\Stage::all();
+        
+        // Get positions and HRs for the current brand
+        $positions = [];
+        $hrs = [];
+        if ($deal->brand_id) {
+            $positions = \App\Models\Position::where('brand_id', $deal->brand_id)->get();
+            $hrs = \App\Models\Hr::where('brand_id', $deal->brand_id)->get();
+        }
+
+        return inertia('Deals/Edit', [
+            'deal' => $deal,
+            'brands' => $brands,
+            'pipelines' => $pipelines,
+            'stages' => $stages,
+            'positions' => $positions,
+            'hrs' => $hrs,
+        ]);
+    }
+
     public function update(Request $request, Deal $deal)
     {
         // Check if the deal belongs to the current user
@@ -160,10 +192,16 @@ class DealController extends Controller
             'hr_id' => 'nullable|exists:hr,id',
             'stage_id' => 'sometimes|exists:stages,id',
             'pipeline_id' => 'sometimes|exists:pipelines,id',
+            'title' => 'sometimes|string|max:255',
+            'amount' => 'sometimes|numeric|min:0',
+            'status' => 'sometimes|string|in:pending,won,lost',
+            'priority' => 'sometimes|string|in:low,medium,high',
+            'due_date' => 'sometimes|nullable|date',
+            'tags' => 'sometimes|array',
         ]);
 
         $deal->update(array_filter($validated));
-        $deal->load(['brand', 'position', 'hr', 'pipeline', 'stage']);
+        $deal->load(['brand', 'position', 'hr', 'pipeline', 'stage', 'candidate']);
 
         if ($request->expectsJson()) {
             return response()->json([
@@ -172,7 +210,7 @@ class DealController extends Controller
             ]);
         }
 
-        return redirect()->back()
+        return redirect()->route('deals.index')
             ->with('success', 'Deal updated successfully')
             ->with('deal', $deal->toArray());
     }

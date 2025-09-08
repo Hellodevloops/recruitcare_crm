@@ -48,12 +48,11 @@ interface Candidate {
 
 interface Position {
     id: number;
-    title: string;
+    designation: string;
     experience: string | null;
     store: string | null;
     city: string | null;
     budget: number | null;
-    designation: string | null;
     brand: Brand | null;
     hr: Hr | null;
     candidate: Candidate | null;
@@ -199,14 +198,14 @@ export default function Show({ position, relatedCandidates }: Props) {
 
     return (
         <AppLayout>
-            <Head title={`Position: ${position.title}`} />
+            <Head title={`Position: ${position.designation}`} />
 
             <div className="container mx-auto py-6">
                 <div className="max-w-7xl mx-auto">
                     {/* Header */}
                     <div className="flex justify-between items-center mb-6">
                         <div>
-                            <h1 className="text-3xl font-bold">{position.title}</h1>
+                            <h1 className="text-3xl font-bold">{position.designation}</h1>
                             <p className="text-gray-600 mt-1">
                                 Position ID: {position.id} • Created: {new Date(position.created_at).toLocaleDateString()}
                             </p>

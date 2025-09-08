@@ -21,8 +21,8 @@ class PositionController extends Controller
             $query->where('brand_id', $request->brand_id);
         }
         
-        $positions = $query->select('id', 'title', 'designation', 'brand_id', 'hr_id')
-            ->orderBy('title')
+        $positions = $query->select('id', 'designation', 'brand_id', 'hr_id')
+            ->orderBy('designation')
             ->get();
         
         return response()->json($positions);
@@ -53,12 +53,11 @@ class PositionController extends Controller
         $validated = $request->validate([
             'brand_id' => 'nullable|exists:brands,id',
             'hr_id' => 'nullable|exists:hr,id',
-            'title' => 'required|string|max:255',
-            'experience' => 'nullable|string|max:255',
+            'designation' => 'required|string|max:255',
+            'experience' => 'required|string|max:255',
             'store' => 'nullable|string|max:255',
             'city' => 'nullable|string|max:255',
             'budget' => 'nullable|numeric|min:0',
-            'designation' => 'nullable|string|max:255',
         ]);
 
         // Convert empty strings to null for optional fields
@@ -157,12 +156,11 @@ class PositionController extends Controller
         $validated = $request->validate([
             'brand_id' => 'nullable|exists:brands,id',
             'hr_id' => 'nullable|exists:hr,id',
-            'title' => 'required|string|max:255',
-            'experience' => 'nullable|string|max:255',
+            'designation' => 'required|string|max:255',
+            'experience' => 'required|string|max:255',
             'store' => 'nullable|string|max:255',
             'city' => 'nullable|string|max:255',
             'budget' => 'nullable|numeric|min:0',
-            'designation' => 'nullable|string|max:255',
         ]);
 
         // Convert empty strings to null for optional fields
