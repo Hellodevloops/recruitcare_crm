@@ -12,12 +12,7 @@ class BrandController extends Controller
     public function getBrandsData()
     {
         try {
-            $userId = auth()->id();
-            if (!$userId) {
-                return response()->json(['error' => 'User not authenticated'], 401);
-            }
-
-            $brands = Brand::where('user_id', $userId)->get();
+            $brands = Brand::all();
             return response()->json($brands);
         } catch (Exception $e) {
             \Log::error('Brand Data Error: ' . $e->getMessage());
@@ -28,12 +23,7 @@ class BrandController extends Controller
     public function index()
     {
         try {
-            $userId = auth()->id();
-            if (!$userId) {
-                return redirect()->route('login');
-            }
-
-            $brands = Brand::where('user_id', $userId)->latest()->get();
+            $brands = Brand::latest()->get();
             
             return Inertia::render('brands/Index', [
                 'brands' => $brands->toArray()
@@ -62,8 +52,6 @@ class BrandController extends Controller
                 'address' => 'nullable|string|max:1000',
             ]);
 
-            $validated['user_id'] = auth()->id();
-
             Brand::create($validated);
 
             return redirect()->route('brands.index')
@@ -76,11 +64,6 @@ class BrandController extends Controller
 
     public function edit(Brand $brand)
     {
-        // Check if the brand belongs to the current user
-        if ($brand->user_id !== auth()->id()) {
-            abort(403, 'Unauthorized access to this brand.');
-        }
-
         return Inertia::render('brands/Edit', [
             'brand' => $brand->toArray()
         ]);
@@ -88,11 +71,6 @@ class BrandController extends Controller
 
     public function update(Request $request, Brand $brand)
     {
-        // Check if the brand belongs to the current user
-        if ($brand->user_id !== auth()->id()) {
-            abort(403, 'Unauthorized access to this brand.');
-        }
-
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'nullable|email|max:255',
@@ -108,11 +86,6 @@ class BrandController extends Controller
 
     public function destroy(Brand $brand)
     {
-        // Check if the brand belongs to the current user
-        if ($brand->user_id !== auth()->id()) {
-            abort(403, 'Unauthorized access to this brand.');
-        }
-
         $brand->delete();
 
         return redirect()->route('brands.index')

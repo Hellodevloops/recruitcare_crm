@@ -19,7 +19,7 @@ class HrController extends Controller
             }
 
             $hrList = Hr::where('user_id', $userId)->with('brand')->latest()->get();
-            $brands = Brand::where('user_id', $userId)->orderBy('name')->get(['id', 'name', 'email', 'phone', 'address']);
+            $brands = Brand::orderBy('name')->get(['id', 'name', 'email', 'phone', 'address']);
 
             return Inertia::render('hr/Index', [
                 'hrList' => $hrList,
@@ -64,8 +64,6 @@ class HrController extends Controller
                 'phone' => 'nullable|string|max:20',
                 'address' => 'nullable|string|max:500',
             ]);
-
-            $validated['user_id'] = auth()->id();
 
             $brand = Brand::create($validated);
 

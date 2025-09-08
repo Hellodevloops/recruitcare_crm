@@ -39,7 +39,7 @@ class PositionController extends Controller
 
     public function create()
     {
-        $brands = Brand::where('user_id', auth()->id())->get();
+        $brands = Brand::all();
         $hrs = Hr::where('user_id', auth()->id())->with('brand')->get()->groupBy('brand_id');
         
         return Inertia::render('positions/Create', [
@@ -136,7 +136,7 @@ class PositionController extends Controller
             abort(403, 'Unauthorized access to this position.');
         }
 
-        $brands = Brand::where('user_id', auth()->id())->get();
+        $brands = Brand::all();
         $hrs = Hr::where('user_id', auth()->id())->with('brand')->get()->groupBy('brand_id');
         
         return Inertia::render('positions/Edit', [

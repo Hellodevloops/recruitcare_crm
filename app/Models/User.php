@@ -56,13 +56,6 @@ class User extends Authenticatable
         return $this->belongsTo(Pipeline::class, 'default_pipeline_id');
     }
 
-    /**
-     * Get the brands created by this user.
-     */
-    public function brands()
-    {
-        return $this->hasMany(Brand::class);
-    }
 
     /**
      * Get the HR records created by this user.

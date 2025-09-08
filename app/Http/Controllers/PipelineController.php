@@ -134,7 +134,7 @@ class PipelineController extends Controller
     {
         $candidates = Candidate::where('owner_id', auth()->id())->get(['id', 'name']);
         $hrs = Hr::with('brand')->get(['id', 'name', 'brand_id']);
-        $brands = Brand::where('user_id', auth()->id())->get(['id', 'name']);
+        $brands = Brand::get(['id', 'name']);
 
         // Predefined stage templates with interview rounds
         $stageTemplates = [

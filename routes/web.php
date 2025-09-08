@@ -185,7 +185,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             }
             
             $hrCount = \App\Models\Hr::where('user_id', $user->id)->count();
-            $brandCount = \App\Models\Brand::where('user_id', $user->id)->count();
+            $brandCount = \App\Models\Brand::count();
             
             return response()->json([
                 'user_id' => $user->id,
@@ -206,7 +206,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
                 return response()->json(['error' => 'User not authenticated'], 401);
             }
             
-            $brands = \App\Models\Brand::where('user_id', $user->id)->get();
+            $brands = \App\Models\Brand::all();
             
             return response()->json([
                 'user_id' => $user->id,
@@ -228,7 +228,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             }
             
             // Test the exact same query as the brands controller
-            $brands = \App\Models\Brand::where('user_id', $user->id)->latest()->get();
+            $brands = \App\Models\Brand::latest()->get();
             
             return response()->json([
                 'user_id' => $user->id,

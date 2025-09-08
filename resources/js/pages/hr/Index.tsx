@@ -52,6 +52,17 @@ export default function HRIndex({ hrList, brands, error }: Props) {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+        
+        // Validate brand selection
+        if (!form.data.brand_id) {
+            toast({
+                title: "Error",
+                description: "Please select a brand",
+                variant: "destructive",
+            });
+            return;
+        }
+        
         form.post('/hr', {
             onSuccess: () => {
                 form.reset();
@@ -61,11 +72,29 @@ export default function HRIndex({ hrList, brands, error }: Props) {
                     description: "HR record created successfully",
                 });
             },
+            onError: (errors) => {
+                toast({
+                    title: "Error",
+                    description: "Please check the form for errors",
+                    variant: "destructive",
+                });
+            },
         });
     };
 
     const handleBrandSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        
+        // Validate brand name
+        if (!brandForm.name.trim()) {
+            toast({
+                title: "Error",
+                description: "Brand name is required",
+                variant: "destructive",
+            });
+            return;
+        }
+        
         try {
             const response = await axios.post('/hr/brand', brandForm);
             if (response.data.success) {
@@ -78,10 +107,11 @@ export default function HRIndex({ hrList, brands, error }: Props) {
                 // Refresh the page to get updated brands list
                 window.location.reload();
             }
-        } catch (error) {
+        } catch (error: any) {
+            const errorMessage = error.response?.data?.message || "Failed to create brand";
             toast({
                 title: "Error",
-                description: "Failed to create brand",
+                description: errorMessage,
                 variant: "destructive",
             });
         }
@@ -110,16 +140,19 @@ export default function HRIndex({ hrList, brands, error }: Props) {
                         <form onSubmit={handleSubmit} className="space-y-4">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                    <Label htmlFor="name">Name</Label>
+                                    <Label htmlFor="name">Name <span className="text-red-500">*</span></Label>
                                     <Input
                                         id="name"
                                         value={form.data.name}
                                         onChange={e => form.setData('name', e.target.value)}
                                         required
                                     />
+                                    {form.errors.name && (
+                                        <p className="text-red-500 text-xs">{form.errors.name}</p>
+                                    )}
                                 </div>
                                 <div className="space-y-2">
-                                    <Label htmlFor="email">Email</Label>
+                                    <Label htmlFor="email">Email <span className="text-red-500">*</span></Label>
                                     <Input
                                         id="email"
                                         type="email"
@@ -127,25 +160,38 @@ export default function HRIndex({ hrList, brands, error }: Props) {
                                         onChange={e => form.setData('email', e.target.value)}
                                         required
                                     />
+                                    {form.errors.email && (
+                                        <p className="text-red-500 text-xs">{form.errors.email}</p>
+                                    )}
                                 </div>
                                 <div className="space-y-2 md:col-span-2">
-                                    <Label>Brand</Label>
+                                    <Label htmlFor="brand_id">Brand <span className="text-red-500">*</span></Label>
                                     <div className="flex gap-2">
                                         <DropdownMenu>
                                             <DropdownMenuTrigger asChild>
-                                                <Button variant="outline" className="w-full justify-between">
+                                                <Button 
+                                                    variant="outline" 
+                                                    className="w-full justify-between min-w-[200px]"
+                                                    type="button"
+                                                >
                                                     {selectedBrand ? selectedBrand.name : 'Select Brand'}
                                                     <ChevronDown className="ml-2 h-4 w-4" />
                                                 </Button>
                                             </DropdownMenuTrigger>
-                                            <DropdownMenuContent className="w-full max-h-[200px] overflow-y-auto">
+                                            <DropdownMenuContent className="w-[300px] max-h-[200px] overflow-y-auto">
                                                 {brands.length > 0 ? (
                                                     brands.map(brand => (
                                                         <DropdownMenuItem 
                                                             key={brand.id}
                                                             onClick={() => handleBrandSelect(brand)}
+                                                            className="cursor-pointer"
                                                         >
-                                                            {brand.name}
+                                                            <div className="flex flex-col">
+                                                                <span className="font-medium">{brand.name}</span>
+                                                                {brand.email && (
+                                                                    <span className="text-xs text-gray-500">{brand.email}</span>
+                                                                )}
+                                                            </div>
                                                         </DropdownMenuItem>
                                                     ))
                                                 ) : (
@@ -155,6 +201,9 @@ export default function HRIndex({ hrList, brands, error }: Props) {
                                                 )}
                                             </DropdownMenuContent>
                                         </DropdownMenu>
+                                        {form.errors.brand_id && (
+                                            <p className="text-red-500 text-xs mt-1">{form.errors.brand_id}</p>
+                                        )}
                                         <Dialog open={isOpen} onOpenChange={setIsOpen}>
                                             <DialogTrigger asChild>
                                                 <Button type="button" variant="outline">+</Button>
@@ -165,11 +214,12 @@ export default function HRIndex({ hrList, brands, error }: Props) {
                                                 </DialogHeader>
                                                 <form onSubmit={handleBrandSubmit} className="space-y-4">
                                                     <div className="space-y-2">
-                                                        <Label htmlFor="brandName">Brand Name</Label>
+                                                        <Label htmlFor="brandName">Brand Name <span className="text-red-500">*</span></Label>
                                                         <Input
                                                             id="brandName"
                                                             value={brandForm.name}
                                                             onChange={e => setBrandForm({ ...brandForm, name: e.target.value })}
+                                                            placeholder="Enter brand name"
                                                             required
                                                         />
                                                     </div>
@@ -180,6 +230,7 @@ export default function HRIndex({ hrList, brands, error }: Props) {
                                                             type="email"
                                                             value={brandForm.email}
                                                             onChange={e => setBrandForm({ ...brandForm, email: e.target.value })}
+                                                            placeholder="Enter brand email (optional)"
                                                         />
                                                     </div>
                                                     <div className="space-y-2">
@@ -188,6 +239,7 @@ export default function HRIndex({ hrList, brands, error }: Props) {
                                                             id="brandPhone"
                                                             value={brandForm.phone}
                                                             onChange={e => setBrandForm({ ...brandForm, phone: e.target.value })}
+                                                            placeholder="Enter brand phone (optional)"
                                                         />
                                                     </div>
                                                     <div className="space-y-2">
@@ -196,11 +248,17 @@ export default function HRIndex({ hrList, brands, error }: Props) {
                                                             id="brandAddress"
                                                             value={brandForm.address}
                                                             onChange={e => setBrandForm({ ...brandForm, address: e.target.value })}
+                                                            placeholder="Enter brand address (optional)"
                                                         />
                                                     </div>
-                                                    <Button type="submit" className="w-full">
-                                                        Create Brand
-                                                    </Button>
+                                                    <div className="flex gap-2">
+                                                        <Button type="button" variant="outline" onClick={() => setIsOpen(false)} className="flex-1">
+                                                            Cancel
+                                                        </Button>
+                                                        <Button type="submit" className="flex-1">
+                                                            Create Brand
+                                                        </Button>
+                                                    </div>
                                                 </form>
                                             </DialogContent>
                                         </Dialog>
